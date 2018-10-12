@@ -71,7 +71,8 @@ public class Controller {
     	textAreaConsole.setText(output);
     	
     	//adding the line from lab
-    	labelCount.setText("Hi"); 	
+    	labelCount.setText("Hi"); 
+    	labelMin.setText("0");
     }
     
     /**
