@@ -70,6 +70,7 @@ public class Controller {
     	}
     	textAreaConsole.setText(output);
     	labelCount.setText("Hi");
+    	labelCount.setText("Bye");
     	//I did it too
     	
     }
