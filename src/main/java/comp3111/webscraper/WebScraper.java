@@ -91,50 +91,6 @@ public class WebScraper
 	 * @return A list of Item that has found. A zero size list is return if nothing is found. Null if any exception (e.g. no connectivity)
 	 */
 	
-	//The function below sorts the items in the List
-	/*
-	public List<Item> SortItem(List<Item> result )
-	{
-		for(int i=0;i<result.size();i++)
-		{
-			
-			for(int j=i+1;j<result.size();j++)
-			{	
-			
-				
-				if(result.get(i).getPrice() > result.get(j).getPrice())
-				{	
-					System.out.println("-----------------------------------");
-					System.out.println("before adding: ");
-					System.out.println(result.get(i).getTitle());
-					System.out.println(result.get(j).getTitle());
-					System.out.println(result.get(j).getPrice());
-					Item temp = result.get(i);
-					result.add(i, result.get(j));
-					result.add(j,temp);
-					System.out.println("-----------------------------------");
-					System.out.println("after adding: ");
-					System.out.println(result.get(i).getTitle());
-					System.out.println(result.get(j).getTitle());
-					System.out.println(result.get(j).getPrice());
-					System.out.println("-----------------------------------");
-				}
-			
-			
-				else if(result.get(i).getPrice() == result.get(j).getPrice())
-				{
-					if((result.get(i).getPortal()=="https://newyork.craigslist.org/") &&(result.get(j).getPortal()=="https://www.price.com.hk/"))
-						continue;
-					
-				}
-					
-			}
-		}
-		return result;
-	}
-	
-	*/
-	
 	public List<Item> scrape(String keyword) 
 	{
 
