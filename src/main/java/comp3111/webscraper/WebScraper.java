@@ -1,6 +1,7 @@
 package comp3111.webscraper;
 
 import java.net.URLEncoder;
+import java.util.Date;
 import java.util.List;
 
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -8,6 +9,10 @@ import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import java.util.Vector;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+//import javafx.scene.control.TableColumn;
+//import javafx.scene.control.TableView;
 
 
 /**
@@ -68,7 +73,6 @@ public class WebScraper {
 
 	private static final String DEFAULT_URL = "https://newyork.craigslist.org/";
 	private WebClient client;
-
 	/**
 	 * Default Constructor 
 	 */
@@ -78,6 +82,7 @@ public class WebScraper {
 		client.getOptions().setJavaScriptEnabled(false);
 	}
 
+	
 	/**
 	 * The only method implemented in this class, to scrape web content from the craigslist
 	 * 
@@ -99,7 +104,8 @@ public class WebScraper {
 				HtmlElement htmlItem = (HtmlElement) items.get(i);
 				HtmlAnchor itemAnchor = ((HtmlAnchor) htmlItem.getFirstByXPath(".//p[@class='result-info']/a"));
 				HtmlElement spanPrice = ((HtmlElement) htmlItem.getFirstByXPath(".//a/span[@class='result-price']"));
-
+				//scraping date from website
+				//HtmlElement postedDate = ((HtmlElement)htmlItem.getFirstByXPath(""));
 				// It is possible that an item doesn't have any price, we set the price to 0.0
 				// in this case
 				String itemPrice = spanPrice == null ? "0.0" : spanPrice.asText();
@@ -107,9 +113,10 @@ public class WebScraper {
 				Item item = new Item();
 				item.setTitle(itemAnchor.asText());
 				item.setUrl(DEFAULT_URL + itemAnchor.getHrefAttribute());
-
 				item.setPrice(new Double(itemPrice.replace("$", "")));
-
+				//task 4
+				//once the date is scrapped, put the postedDate variable instead of "new Date()"
+				item.setDate(new Date());
 				result.add(item);
 			}
 			client.close();
@@ -119,5 +126,19 @@ public class WebScraper {
 		}
 		return null;
 	}
+	
+//	//task 4
+//	public static ObservableList<Item> getObservablelist(List<Item> result)
+//	{
+//		ObservableList<Item> info = FXCollections.observableArrayList();
+//		
+//		for (Item item : result)
+//		{
+//		info.addAll(item);
+//		System.out.println(item);
+//		}
+//		
+//		return info;
+//	}
 
 }
