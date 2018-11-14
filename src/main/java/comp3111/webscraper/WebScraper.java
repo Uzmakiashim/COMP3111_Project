@@ -163,12 +163,9 @@ public class WebScraper
 				//Task 2 subtask (ii) Modify the class Item so that it will also record which portal this item is coming from.
 				item.setPortal(DEFAULT_URL);
 				item.setPrice(new Double(itemPrice.replace("$", "")));
-
 				result.add(item);
 			}
-			
-			
-			
+
 			client.close();
 			return SortItem(result);
 		} catch (Exception e) {
