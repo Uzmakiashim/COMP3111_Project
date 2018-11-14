@@ -91,6 +91,42 @@ public class WebScraper
 	 * @return A list of Item that has found. A zero size list is return if nothing is found. Null if any exception (e.g. no connectivity)
 	 */
 	
+	public List<Item> SortItem(List<Item> result)
+	{
+		
+		for(int i=0;i<result.size();i++)
+		{	
+			for(int j=i+1;j<result.size();j++)
+			{
+				if(result.get(i).getPrice() > result.get(j).getPrice())
+				{					
+					Item temp = result.get(i);
+					 result.add(i, result.get(j));
+					 result.remove(i+1);
+					 result.add(j, temp);
+					 result.remove(j+1);
+				}
+				
+				else if(result.get(i).getPrice() == result.get(j).getPrice())
+				{
+					if(result.get(j).getUrl()=="https://newyork.craigslist.org/")
+					{
+						 Item temp = result.get(i);
+						 result.add(i, result.get(j));
+						 result.remove(i+1);
+						 result.add(j, temp);
+						 result.remove(j+1);
+					}	
+				}
+				else
+					continue;
+				
+			}
+		}
+		return result;
+	}
+	
+	
 	public List<Item> scrape(String keyword) 
 	{
 
@@ -99,8 +135,6 @@ public class WebScraper
 			HtmlPage page = client.getPage(searchUrl);
 		
 			List<?> items = (List<?>) page.getByXPath("//li[@class='result-row']");
-			
-			
 			
 			//Changed from default Vector<Item> result = new Vector<Item>(); because return type is List
 			//Vector<Item> result = new Vector<Item>();
@@ -136,7 +170,7 @@ public class WebScraper
 			
 			
 			client.close();
-			return result;
+			return SortItem(result);
 		} catch (Exception e) {
 			System.out.println(e);
 		}
