@@ -64,17 +64,23 @@ import java.util.Vector;
  * 
  *
  */
-public class WebScraper {
+public class WebScraper 
+{
 
 	private static final String DEFAULT_URL = "https://newyork.craigslist.org/";
+	private static final String NEW_URL = "https://www.price.com.hk/";
+
+
+	
 	private WebClient client;
 
 	/**
 	 * Default Constructor 
 	 */
-	public WebScraper() {
+	public WebScraper() 
+	{
 		client = new WebClient();
-		client.getOptions().setCssEnabled(false);
+		client.getOptions().setCssEnabled(false);// so that we only get HTML files
 		client.getOptions().setJavaScriptEnabled(false);
 	}
 
@@ -84,20 +90,66 @@ public class WebScraper {
 	 * @param keyword - the keyword you want to search
 	 * @return A list of Item that has found. A zero size list is return if nothing is found. Null if any exception (e.g. no connectivity)
 	 */
-	public List<Item> scrape(String keyword) {
+	
+	public List<Item> SortItem(List<Item> result)
+	{
+		
+		for(int i=0;i<result.size();i++)
+		{	
+			for(int j=i+1;j<result.size();j++)
+			{
+				if(result.get(i).getPrice() > result.get(j).getPrice())
+				{					
+					Item temp = result.get(i);
+					 result.add(i, result.get(j));
+					 result.remove(i+1);
+					 result.add(j, temp);
+					 result.remove(j+1);
+				}
+				
+				else if(result.get(i).getPrice() == result.get(j).getPrice())
+				{
+					if(result.get(j).getUrl()=="https://newyork.craigslist.org/")
+					{
+						 Item temp = result.get(i);
+						 result.add(i, result.get(j));
+						 result.remove(i+1);
+						 result.add(j, temp);
+						 result.remove(j+1);
+					}	
+				}
+				else
+					continue;
+				
+			}
+		}
+		return result;
+	}
+	
+	
+	public List<Item> scrape(String keyword) 
+	{
 
 		try {
 			String searchUrl = DEFAULT_URL + "search/sss?sort=rel&query=" + URLEncoder.encode(keyword, "UTF-8");
 			HtmlPage page = client.getPage(searchUrl);
-
-			
+		
 			List<?> items = (List<?>) page.getByXPath("//li[@class='result-row']");
 			
-			Vector<Item> result = new Vector<Item>();
-
-			for (int i = 0; i < items.size(); i++) {
+			//Changed from default Vector<Item> result = new Vector<Item>(); because return type is List
+			//Vector<Item> result = new Vector<Item>();
+			List<Item> result = scrape_new(keyword);
+			//System.out.println("items_size=="+items.size());
+			for (int i = 0; i < items.size(); i++) 
+			{
 				HtmlElement htmlItem = (HtmlElement) items.get(i);
+			
 				HtmlAnchor itemAnchor = ((HtmlAnchor) htmlItem.getFirstByXPath(".//p[@class='result-info']/a"));
+				
+				
+				
+				//System.out.println(itemAnchor.asText());
+				//<span class="result-price">$5</span>
 				HtmlElement spanPrice = ((HtmlElement) htmlItem.getFirstByXPath(".//a/span[@class='result-price']"));
 
 				// It is possible that an item doesn't have any price, we set the price to 0.0
@@ -107,17 +159,75 @@ public class WebScraper {
 				Item item = new Item();
 				item.setTitle(itemAnchor.asText());
 				item.setUrl(DEFAULT_URL + itemAnchor.getHrefAttribute());
-
+				
+				//Task 2 subtask (ii) Modify the class Item so that it will also record which portal this item is coming from.
+				item.setPortal(DEFAULT_URL);
 				item.setPrice(new Double(itemPrice.replace("$", "")));
 
 				result.add(item);
 			}
+			
+			
+			
 			client.close();
-			return result;
+			return SortItem(result);
 		} catch (Exception e) {
 			System.out.println(e);
 		}
+		
+		
 		return null;
 	}
+	/*
+	 * Name: Ashim (task 2)
+	 * Scrape data from a new website (amazon)
+	 * @XML Path
+	 * 
+	 */
+	public List<Item> scrape_new(String keyword)
+	{
+				try
+				{
+					//String searchUrl = NEW_URL + "s/ref=nb_sb_noss_2?url=search-alias%3Daps&field-keywords=" + URLEncoder.encode(keyword, "UTF-8");
+					String searchUrl = NEW_URL + "search.php?g=T&q=" + URLEncoder.encode(keyword, "UTF-8");
+					HtmlPage page2 = client.getPage(searchUrl);
+					
+					List<?> items = (List<?>) page2.getByXPath("//div[@class='item']");
+				
+					Vector<Item> result = new Vector<Item>();
+					
+					//Scraping data from the second URL
+					//System.out.println("items_size=="+items.size());
+					for (int i = 0; i < items.size(); i++) //items_second_Url.size() -> number of items in the list 
+					{
+						HtmlElement second_htmlItem = (HtmlElement) items.get(i);
+						
+						//prints all the items and their attributes
+						//System.out.println(second_htmlItem.asText());
 
+						HtmlAnchor itemAnchor = ((HtmlAnchor) second_htmlItem.getFirstByXPath(".//div[@class='line line-01']/a"));
+			
+						HtmlElement spanPrice = ((HtmlElement) second_htmlItem.getFirstByXPath(".//span[@class='text-price-number']"));
+				
+						// It is possible that an item doesn't have any price, we set the price to 0.0
+						// in this case
+						String itemPrice = spanPrice == null ? "0.0" : spanPrice.asText();
+
+						Item item = new Item();
+						item.setTitle(itemAnchor.asText());
+						item.setUrl(NEW_URL + itemAnchor.getHrefAttribute());
+						item.setPortal(NEW_URL);
+						item.setPrice(new Double(itemPrice.replaceAll(",", "")));
+						result.add(item);
+						
+					}
+					client.close();
+					return result;
+				}
+				catch(Exception e) {
+					System.out.println(e.getMessage());
+				}		
+				return null;
+						
+	}
 }
