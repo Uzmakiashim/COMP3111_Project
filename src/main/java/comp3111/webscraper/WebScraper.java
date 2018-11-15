@@ -196,7 +196,10 @@ public List<Item> scrape(String keyword)
 			numOfPageScrapped++;
 			System.out.println("Number of Pages Scraped: "+numOfPageScrapped);	
 			numberOfPages = (numberOfItems/Craig_num_of_Items)-1;
-			//System.out.println(numberOfPages);
+			
+			//case when 120 / 2211 where it gives a decimal val but after converting to integer loose the decimal place hence loosing its accuracy
+			if(Craig_num_of_Items%numberOfItems!=0)
+				numberOfPages++;
 			
 			if(numberOfPages>0)
 				result = multiple_page(result,numberOfPages,URL);
