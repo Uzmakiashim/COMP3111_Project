@@ -6,6 +6,9 @@ public class Item {
 	private String title ; 
 	private double price ;
 	private String url ;
+	//-----------------Janice task1-------------------------
+	private String date;
+	//-----------------end of task1-------------------------
 	
 	public String getTitle() {
 		return title;
@@ -26,5 +29,13 @@ public class Item {
 		this.url = url;
 	}
 	
+	//-----------------Janice task1-------------------------
+	public String getDate() {
+		return date;
+	}
+	public void setDate(String date) {
+		this.date = date;
+	}
+	//-----------------end of task1-------------------------
 
 }

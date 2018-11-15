@@ -9,6 +9,12 @@ import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import java.util.Vector;
 
+//-----------------Janice task1-------------------------
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+//-----------------end of task1-------------------------
+
 
 /**
  * WebScraper provide a sample code that scrape web content. After it is constructed, you can call the method scrape with a keyword, 
@@ -99,6 +105,11 @@ public class WebScraper {
 				HtmlElement htmlItem = (HtmlElement) items.get(i);
 				HtmlAnchor itemAnchor = ((HtmlAnchor) htmlItem.getFirstByXPath(".//p[@class='result-info']/a"));
 				HtmlElement spanPrice = ((HtmlElement) htmlItem.getFirstByXPath(".//a/span[@class='result-price']"));
+				
+				//-----------------Janice task1-------------------------
+				//get date of item
+				HtmlElement timeDate = ((HtmlElement) htmlItem.getFirstByXPath(".//time[@class='result-date']"));
+				//-----------------end of task1-------------------------
 
 				// It is possible that an item doesn't have any price, we set the price to 0.0
 				// in this case
@@ -106,9 +117,14 @@ public class WebScraper {
 
 				Item item = new Item();
 				item.setTitle(itemAnchor.asText());
-				item.setUrl(DEFAULT_URL + itemAnchor.getHrefAttribute());
+				item.setUrl(itemAnchor.getHrefAttribute());
 
 				item.setPrice(new Double(itemPrice.replace("$", "")));
+				
+				//-----------------Janice task1-------------------------
+				//set date after geting substring from timeDate in the format of yyyy-MM-dd HH:mm
+				item.setDate(timeDate.asXml().substring(36, 36+16));
+				//-----------------end of task1-------------------------
 
 				result.add(item);
 			}
