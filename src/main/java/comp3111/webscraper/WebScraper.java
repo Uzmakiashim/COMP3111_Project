@@ -170,6 +170,7 @@ public List<Item> scrape(String keyword)
 					Craig_num_of_Items = Integer.parseInt(Craiglist_num_of_Items.asText());
 					//System.out.println(numberOfItems);
 					//System.out.println(Craig_num_of_Items);
+				
 					
 				}
 				//System.out.println(itemAnchor.asText());
@@ -191,6 +192,12 @@ public List<Item> scrape(String keyword)
 				
 				//<a href="/search/sss?query=apple&amp;s=120&amp;sort=rel" class="button next" title="next page">next &gt; </a>
 				URL = ((HtmlAnchor) htmlItem.getFirstByXPath("//a[@class='button next']"));
+				
+				//Getting Date of item posted	
+				//XMLpath = //*[@id="sortable-results"]/ul/li[1]/p/time
+				HtmlElement Item_Date = ((HtmlElement) htmlItem.getFirstByXPath(".//time[@class='result-date']"));
+				item.setDate(Item_Date.asText());
+				//System.out.println(item.getDate());
 			
 			}
 			numOfPageScrapped++;
@@ -255,6 +262,13 @@ public List<Item> multiple_page(List<Item> result,int numberOfPages,HtmlAnchor U
 						result.add(item);
 						URL = ((HtmlAnchor) htmlItem.getFirstByXPath("//a[@class='button next']"));	
 						
+						//Getting Date of item posted	
+						//XMLpath = //*[@id="sortable-results"]/ul/li[1]/p/time
+						HtmlElement Item_Date = ((HtmlElement) htmlItem.getFirstByXPath(".//time[@class='result-date']"));
+						item.setDate(Item_Date.asText());
+						//System.out.println(item.getDate());
+						
+						
 				 	}
 			 	}
 			 catch (Exception e) 
@@ -309,8 +323,14 @@ public List<Item> scrape_new(String keyword)
 						item.setTitle(itemAnchor.asText());
 						item.setUrl(NEW_URL + itemAnchor.getHrefAttribute());
 						item.setPortal(NEW_URL);
-						item.setPrice(new Double(itemPrice.replaceAll(",", "")));
+						item.setPrice((new Double(itemPrice.replaceAll(",", "")))*0.13);
 						result.add(item);
+						
+						//Getting Date of item posted			
+						//
+						HtmlElement Date = ((HtmlElement) second_htmlItem.getFirstByXPath(".//td[@class='info-content']"));
+						//System.out.println(Date.asText());
+						item.setDate(Date.asText());
 						
 					}
 					client.close();
