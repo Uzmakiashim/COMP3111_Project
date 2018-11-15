@@ -8,6 +8,16 @@ public class Item
 	private double price ;
 	private String url ;
 	private String portal;	// variable that identifies which portal the item came from
+	private String Date;
+	
+	public String getDate() 
+	{
+		return Date;
+	}
+	public void setDate(String Date) 
+	{
+		this.Date = Date;
+	}
 	
 	public String getPortal() 
 	{
