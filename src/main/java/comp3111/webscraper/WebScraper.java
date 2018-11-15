@@ -69,7 +69,7 @@ public class WebScraper
 
 	private static final String DEFAULT_URL = "https://newyork.craigslist.org/";
 	private static final String NEW_URL = "https://www.price.com.hk/";
-	int numOfPageScrapped = 0;
+	private int numOfPageScrapped = 0;
 	
 	private WebClient client;
 
@@ -138,18 +138,26 @@ public List<Item> scrape(String keyword)
 			int numberOfItems=0;
 			int Craig_num_of_Items = 0;
 			int numberOfPages = 0;
+			int num_ItemsPerPage = 0;
 			HtmlAnchor URL = null;
+			
 			
 			String searchUrl = DEFAULT_URL + "search/sss?sort=rel&query=" + URLEncoder.encode(keyword, "UTF-8");
 			HtmlPage page = client.getPage(searchUrl);
 		
 			List<?> items = (List<?>) page.getByXPath("//li[@class='result-row']");
 			
+			
+			HtmlElement temp = (HtmlElement) items.get(0);
+			HtmlElement ItemsPerPage = ((HtmlElement) temp.getFirstByXPath("//*[@id=\"searchform\"]/div[3]/div[3]/span[2]/span[3]/span[1]/span[2]"));
+			num_ItemsPerPage = Integer.parseInt(ItemsPerPage.asText());
+					
 			//Changed from default Vector<Item> result = new Vector<Item>(); because return type is List
 			//Vector<Item> result = new Vector<Item>();
 			List<Item> result = scrape_new(keyword);
 			
-			for (int i = 0; i < items.size(); i++) {
+			
+			for (int i = 0; i < num_ItemsPerPage; i++) {
 				HtmlElement htmlItem = (HtmlElement) items.get(i);
 				HtmlAnchor itemAnchor = ((HtmlAnchor) htmlItem.getFirstByXPath(".//p[@class='result-info']/a"));
 				//XML PATH = *[@id="searchform"]/div[3]/div[3]/span[2]/span[3]/span[2]
@@ -188,7 +196,7 @@ public List<Item> scrape(String keyword)
 			numOfPageScrapped++;
 			System.out.println("Number of Pages Scraped: "+numOfPageScrapped);	
 			numberOfPages = (numberOfItems/Craig_num_of_Items)-1;
-			System.out.println(numberOfPages);
+			//System.out.println(numberOfPages);
 			
 			if(numberOfPages>0)
 				result = multiple_page(result,numberOfPages,URL);
@@ -250,9 +258,9 @@ public List<Item> multiple_page(List<Item> result,int numberOfPages,HtmlAnchor U
 			 {
 				 System.out.println(e);
 			 }
-			 if(i==numberOfPages)
-				 System.out.println("This is the last page that will be scraped");
+				
 		}
+		System.out.println("This is the last page that will be scraped");
 		return result;
 }
 	
@@ -265,6 +273,7 @@ public List<Item> multiple_page(List<Item> result,int numberOfPages,HtmlAnchor U
 	
 public List<Item> scrape_new(String keyword)
 	{
+	numOfPageScrapped=0;
 				try
 				{
 					//String searchUrl = NEW_URL + "s/ref=nb_sb_noss_2?url=search-alias%3Daps&field-keywords=" + URLEncoder.encode(keyword, "UTF-8");
