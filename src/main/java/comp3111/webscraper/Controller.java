@@ -77,7 +77,7 @@ public class Controller
     		output += item.getTitle() + "\t" + item.getPrice() + "\t" + item.getUrl() + "\n";
     	}
     	textAreaConsole.setText(output);
-      Task2_(subtask3)
+      //Task2_(subtask3)
     	
     	//labelCount.setText("Hi");
 
