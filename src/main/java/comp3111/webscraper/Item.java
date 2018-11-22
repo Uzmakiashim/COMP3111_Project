@@ -2,40 +2,56 @@ package comp3111.webscraper;
 
 
 
-public class Item {
+public class Item 
+{
 	private String title ; 
 	private double price ;
 	private String url ;
-	//-----------------Janice task1-------------------------
-	private String date;
-	//-----------------end of task1-------------------------
+
+	private String portal;	// variable that identifies which portal the item came from
+	private String Date;
+
 	
-	public String getTitle() {
+	public String getDate() 
+	{
+		return Date;
+	}
+	public void setDate(String Date) 
+	{
+		this.Date = Date;
+	}
+	
+	public String getPortal() 
+	{
+		return portal;
+	}
+	public void setPortal(String portal) 
+	{
+		this.portal = portal;
+	}
+	
+	public String getTitle() 
+	{
 		return title;
 	}
-	public void setTitle(String title) {
+	public void setTitle(String title) 
+	{
 		this.title = title;
 	}
 	public double getPrice() {
 		return price;
 	}
-	public void setPrice(double price) {
+	public void setPrice(double price) 
+	{
 		this.price = price;
 	}
-	public String getUrl() {
+	public String getUrl() 
+	{
 		return url;
 	}
-	public void setUrl(String url) {
+	public void setUrl(String url) 
+	{
 		this.url = url;
 	}
-	
-	//-----------------Janice task1-------------------------
-	public String getDate() {
-		return date;
-	}
-	public void setDate(String date) {
-		this.date = date;
-	}
-	//-----------------end of task1-------------------------
 
 }

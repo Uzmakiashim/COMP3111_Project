@@ -46,8 +46,12 @@ import java.util.List;
  * Controller class that manage GUI interaction. Please see document about JavaFX for details.
  * 
  */
-public class Controller {
+//Controller is the link between the GUI and the code part(we use scene builder for easier)
+//scene builder generates an xml file -> This file generates the code or HTML version - >
+public class Controller 
+{
 
+	
     @FXML 
     private Label labelCount; 
 
@@ -86,15 +90,18 @@ public class Controller {
     /**
      * Default controller
      */
-    public Controller() {
+    public Controller() 
+    {
     	scraper = new WebScraper();
+    
     }
 
     /**
      * Default initializer. It is empty.
      */
     @FXML
-    private void initialize() {
+    private void initialize() 
+    {
     	
     }
     
@@ -166,6 +173,7 @@ public class Controller {
     	
     	textAreaConsole.setText(output);
     	
+
     	//-----------------Janice task1-------------------------
     	//show results
     	labelCount.setText(Integer.toString(itemNo));
@@ -194,6 +202,7 @@ public class Controller {
     		}
     	});
     	//-----------------end of task1-------------------------
+
     	
     	//-----------------Janice task6-------------------------
     	//update lastSearch button
@@ -205,7 +214,8 @@ public class Controller {
      * Called when the new button is pressed. Very dummy action - print something in the command prompt.
      */
     @FXML
-    private void actionNew() {
+    private void actionNew() 
+    {
     	System.out.println("actionNew");
     }
     
