@@ -345,8 +345,24 @@ public List<Item> scrape_new(String keyword)
 						//Getting Date of item posted			
 						//
 						HtmlElement Date = ((HtmlElement) second_htmlItem.getFirstByXPath(".//td[@class='info-content']"));
-						item.setDate(Date.asText().substring(0,4)+"-"+Date.asText().substring(5, Date.asText().indexOf("月"))+"-"+Date.asText().substring(Date.asText().indexOf("月")+1, Date.asText().indexOf("日"))+" 00:00");
+						String date_str = "";
+						for(int k=0;k<Date.asText().length()-1;k++) {
+							if(Date.asText().charAt(k)<=57 && Date.asText().charAt(k)>=48)
+								date_str += Date.asText().charAt(k);
+							else
+								date_str += "-";
+						}
+						
+						if(date_str.length()<10) {
+							if(date_str.charAt(7)!='-')
+								date_str = date_str.substring(0, 5)+"0"+date_str.substring(5,date_str.length());
+							if(date_str.length()<10)
+								date_str = date_str.substring(0,date_str.length()-1)+"0"+date_str.substring(date_str.length()-1,date_str.length());
+						}
+						date_str += " 00:00";
+						item.setDate(date_str);
 						System.out.println(item.getDate());
+						
 						
 					}
 					client.close();
