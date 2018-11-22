@@ -1,6 +1,7 @@
 package comp3111.webscraper;
 
 import java.net.URLEncoder;
+import java.util.Date;
 import java.util.List;
 
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -8,6 +9,10 @@ import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import java.util.Vector;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+//import javafx.scene.control.TableColumn;
+//import javafx.scene.control.TableView;
 
 //-----------------Janice task1-------------------------
 import java.text.ParseException;
@@ -78,7 +83,6 @@ public class WebScraper
 	private int numOfPageScrapped = 0;
 	
 	private WebClient client;
-
 	/**
 	 * Default Constructor 
 	 */
@@ -89,6 +93,7 @@ public class WebScraper
 		client.getOptions().setJavaScriptEnabled(false);
 	}
 
+	
 	/**
 	 * The only method implemented in this class, to sort the items stored in the List
 	 * 
@@ -188,6 +193,7 @@ public List<Item> scrape(String keyword)
 				HtmlElement timeDate = ((HtmlElement) htmlItem.getFirstByXPath(".//time[@class='result-date']"));
 				//-----------------end of task1-------------------------
 
+
 				// It is possible that an item doesn't have any price, we set the price to 0.0
 				// in this case
 				String itemPrice = spanPrice == null ? "0.0" : spanPrice.asText();
@@ -196,16 +202,16 @@ public List<Item> scrape(String keyword)
 
 				item.setUrl(itemAnchor.getHrefAttribute());
 
-				
+			
 				//Task 2 subtask (ii) Modify the class Item so that it will also record which portal this item is coming from.
 				item.setPortal(DEFAULT_URL);
 
 				item.setPrice(new Double(itemPrice.replace("$", "")));
-				
 				//-----------------Janice task1-------------------------
 				//set date after geting substring from timeDate in the format of yyyy-MM-dd HH:mm
 				item.setDate(timeDate.asXml().substring(36, 36+16));
 				//-----------------end of task1-------------------------
+
 
 				result.add(item);
 				
@@ -238,7 +244,22 @@ public List<Item> scrape(String keyword)
 		
 		
 		return null;
-}
+	}
+	
+//	//task 4
+//	public static ObservableList<Item> getObservablelist(List<Item> result)
+//	{
+//		ObservableList<Item> info = FXCollections.observableArrayList();
+//		
+//		for (Item item : result)
+//		{
+//		info.addAll(item);
+//		System.out.println(item);
+//		}
+//		
+//		return info;
+//	}
+
 	
 	
 /**
@@ -327,6 +348,7 @@ public List<Item> scrape_new(String keyword)
 						//prints all the items and their attributes
 						//System.out.println(second_htmlItem.asText());
 
+
 						HtmlAnchor itemAnchor = ((HtmlAnchor) second_htmlItem.getFirstByXPath(".//div[@class='line line-01']/a"));
 			
 						HtmlElement spanPrice = ((HtmlElement) second_htmlItem.getFirstByXPath(".//span[@class='text-price-number']"));
@@ -337,7 +359,10 @@ public List<Item> scrape_new(String keyword)
 
 						Item item = new Item();
 						item.setTitle(itemAnchor.asText());
-						item.setUrl(itemAnchor.getHrefAttribute());
+
+						item.setUrl( NEW_URL +itemAnchor.getHrefAttribute());
+			
+            
 						item.setPortal(NEW_URL);
 						item.setPrice((new Double(itemPrice.replaceAll(",", "")))*0.13);
 						result.add(item);

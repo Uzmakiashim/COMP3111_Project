@@ -7,9 +7,18 @@ package comp3111.webscraper;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.Hyperlink;
+
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+
 //-----------------Janice task1-------------------------
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
@@ -35,6 +44,13 @@ import javafx.stage.Stage;
 import java.util.List;
 
 
+import java.awt.*;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import javafx.scene.control.Button;
+
 
 
 
@@ -46,12 +62,19 @@ import java.util.List;
  * Controller class that manage GUI interaction. Please see document about JavaFX for details.
  * 
  */
+public class Controller {
+	/*
+	 * task 4
+	 */
+	@FXML private TableView<Item> searchTable;
+	@FXML private TableColumn<Item,String> itemTitle;
+	@FXML private TableColumn<Item,String> itemPrice;
+	@FXML private TableColumn<Item,String> itemURL;
+	@FXML private TableColumn<Item,String> itemPostdate;
+
 //Controller is the link between the GUI and the code part(we use scene builder for easier)
 //scene builder generates an xml file -> This file generates the code or HTML version - >
-public class Controller 
-{
 
-	
     @FXML 
     private Label labelCount; 
 
@@ -70,6 +93,10 @@ public class Controller
     @FXML
     private TextArea textAreaConsole;
     
+
+    @FXML
+    private Button refineButton;
+
 //-----------------Janice task6-------------------------
     @FXML
     private MenuItem lsButton;
@@ -85,7 +112,9 @@ public class Controller
     private Item newestItem = new Item();
     private WebScraperApplication app = new WebScraperApplication();
 //-----------------end of task1-------------------------    
+
     private WebScraper scraper;
+    
     
     /**
      * Default controller
@@ -102,13 +131,46 @@ public class Controller
     @FXML
     private void initialize() 
     {
-    	
+    	System.out.println("In bro");
+        itemURL.setCellFactory(tc ->{
+            TableCell<Item, String> urlcell = new TableCell<Item, String>() 
+            {
+            @Override
+            protected void updateItem(String itemincell, boolean emptyorNot)
+            {
+            	super.updateItem(itemincell, emptyorNot);
+                setText(emptyorNot ? null : itemincell);
+            }
+            };
+            urlcell.setOnMouseClicked(e -> {
+                if (urlcell.isEmpty()==false) 
+                {
+                    String clickableURL = urlcell.getItem();
+                    if (Desktop.isDesktopSupported()) 
+                    {
+                        try 
+                        {
+                            Desktop.getDesktop().browse(new URI(clickableURL));
+                        } catch (Exception exception) 
+                        {
+                            exception.printStackTrace();
+                        }
+                    }
+                }
+            });
+            return urlcell;
+        });
+        refineButton.setDisable(true);
+
     }
+
+    
     
     /**
      * Called when the search button is pressed.
      */
     @FXML
+
     private void actionSearch() {
     	//-----------------Janice task6-------------------------
     	//updating lastInput
@@ -118,6 +180,7 @@ public class Controller
     	}
     	//-----------------end of task6-------------------------
     	
+
     	System.out.println("actionSearch: " + textFieldKeyword.getText());
     	
     	//-----------------Janice task1------------------------- 
@@ -135,9 +198,24 @@ public class Controller
     	//-----------------end of task1-------------------------
 
     	List<Item> result = scraper.scrape(textFieldKeyword.getText());
+    	System.out.println(result.size());
+    	if(result.size()!=0)
+    		refineButton.setDisable(false);
     	String output = "";
     	for (Item item : result) {
     		output += item.getTitle() + "\t" + item.getPrice() + "\t" + item.getUrl() + "\n";
+      }
+      
+    	//task 4
+    	this.itemTitle.setCellValueFactory(new PropertyValueFactory<Item,String>("title"));
+    	this.itemPrice.setCellValueFactory(new PropertyValueFactory<Item,String>("price"));
+       	this.itemURL.setCellValueFactory(new PropertyValueFactory<Item,String>("url"));
+    	this.itemPostdate.setCellValueFactory(new PropertyValueFactory<Item,String>("date"));
+       	this.searchTable.setItems(FXCollections.observableArrayList(result));
+ 
+       	//Task2_(subtask3)
+    	
+   
     		
     		//-----------------Janice task1-------------------------
     		//update count
@@ -208,15 +286,35 @@ public class Controller
     	//update lastSearch button
     	lsButton.setDisable(false);
     	//-----------------end of task6-------------------------
+
     }
     
     /**
      * Called when the new button is pressed. Very dummy action - print something in the command prompt.
      */
+    //Sunny task 4
     @FXML
     private void actionNew() 
     {
-    	System.out.println("actionNew");
+    	String output="";
+    	String refineSearch = textFieldKeyword.getText();
+    	System.out.println("actionNew: " + refineSearch);
+    	List<Item> tempresult= this.searchTable.getItems();
+    	List<Item> refinedresults= new ArrayList<Item>();
+    	for(Item item:tempresult)
+    	{
+    		if(item.getTitle().toLowerCase().contains(refineSearch.toLowerCase()))
+    			refinedresults.add(item);
+    	}
+    	System.out.println(tempresult.size());
+    	System.out.println(refinedresults.size());
+    	
+    	this.searchTable.setItems(FXCollections.observableArrayList(refinedresults));
+    	for (Item item : refinedresults) {
+    		output += item.getTitle() + "\t" + item.getPrice() + "\t" + item.getUrl() + "\n";
+    	}    	
+    	textAreaConsole.setText(output);
+    	refineButton.setDisable(true);
     }
     
   //-----------------Janice task6-------------------------
@@ -272,4 +370,3 @@ public class Controller
     }
   //-----------------end of task6-------------------------
 }
-
