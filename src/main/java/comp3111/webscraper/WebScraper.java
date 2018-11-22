@@ -270,7 +270,7 @@ public List<Item> multiple_page(List<Item> result,int numberOfPages,HtmlAnchor U
 		
 						Item item = new Item();
 						item.setTitle(itemAnchor.asText());
-						item.setUrl(DEFAULT_URL + itemAnchor.getHrefAttribute());
+						item.setUrl(itemAnchor.getHrefAttribute());
 						
 						
 						item.setPortal(DEFAULT_URL);
@@ -337,7 +337,7 @@ public List<Item> scrape_new(String keyword)
 
 						Item item = new Item();
 						item.setTitle(itemAnchor.asText());
-						item.setUrl(NEW_URL + itemAnchor.getHrefAttribute());
+						item.setUrl(itemAnchor.getHrefAttribute());
 						item.setPortal(NEW_URL);
 						item.setPrice((new Double(itemPrice.replaceAll(",", "")))*0.13);
 						result.add(item);
@@ -345,8 +345,8 @@ public List<Item> scrape_new(String keyword)
 						//Getting Date of item posted			
 						//
 						HtmlElement Date = ((HtmlElement) second_htmlItem.getFirstByXPath(".//td[@class='info-content']"));
-						//System.out.println(Date.asText());
-						item.setDate(Date.asText());
+						item.setDate(Date.asText().substring(0,4)+"-"+Date.asText().substring(5, Date.asText().indexOf("月"))+"-"+Date.asText().substring(Date.asText().indexOf("月")+1, Date.asText().indexOf("日"))+" 00:00");
+						System.out.println(item.getDate());
 						
 					}
 					client.close();
