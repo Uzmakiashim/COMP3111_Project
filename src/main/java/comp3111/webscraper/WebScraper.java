@@ -14,6 +14,12 @@ import javafx.collections.ObservableList;
 //import javafx.scene.control.TableColumn;
 //import javafx.scene.control.TableView;
 
+//-----------------Janice task1-------------------------
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+//-----------------end of task1-------------------------
+
 
 /**
  * WebScraper provide a sample code that scrape web content. After it is constructed, you can call the method scrape with a keyword, 
@@ -181,21 +187,32 @@ public List<Item> scrape(String keyword)
 				//System.out.println(itemAnchor.asText());
 				//<span class="result-price">$5</span>
 				HtmlElement spanPrice = ((HtmlElement) htmlItem.getFirstByXPath(".//a/span[@class='result-price']"));
-				//scraping date from website
-				//HtmlElement postedDate = ((HtmlElement)htmlItem.getFirstByXPath(""));
+				
+				//-----------------Janice task1-------------------------
+				//get date of item
+				HtmlElement timeDate = ((HtmlElement) htmlItem.getFirstByXPath(".//time[@class='result-date']"));
+				//-----------------end of task1-------------------------
+
+
 				// It is possible that an item doesn't have any price, we set the price to 0.0
 				// in this case
 				String itemPrice = spanPrice == null ? "0.0" : spanPrice.asText();
 				Item item = new Item();
 				item.setTitle(itemAnchor.asText());
+
 				item.setUrl(itemAnchor.getHrefAttribute());
-				//DEFAULT_URL + 
+
+			
 				//Task 2 subtask (ii) Modify the class Item so that it will also record which portal this item is coming from.
 				item.setPortal(DEFAULT_URL);
+
 				item.setPrice(new Double(itemPrice.replace("$", "")));
-				//task 4
-				//once the date is scrapped, put the postedDate variable instead of "new Date()"
-				//item.setDate(new Date());
+				//-----------------Janice task1-------------------------
+				//set date after geting substring from timeDate in the format of yyyy-MM-dd HH:mm
+				item.setDate(timeDate.asXml().substring(36, 36+16));
+				//-----------------end of task1-------------------------
+
+
 				result.add(item);
 				
 				//<a href="/search/sss?query=apple&amp;s=120&amp;sort=rel" class="button next" title="next page">next &gt; </a>
@@ -203,9 +220,6 @@ public List<Item> scrape(String keyword)
 				
 				//Getting Date of item posted	
 				//XMLpath = //*[@id="sortable-results"]/ul/li[1]/p/time
-				HtmlElement Item_Date = ((HtmlElement) htmlItem.getFirstByXPath(".//time[@class='result-date']"));
-				item.setDate(Item_Date.asText());
-				//System.out.println(item.getDate());
 			
 			}
 			numOfPageScrapped++;
@@ -277,7 +291,7 @@ public List<Item> multiple_page(List<Item> result,int numberOfPages,HtmlAnchor U
 		
 						Item item = new Item();
 						item.setTitle(itemAnchor.asText());
-						item.setUrl(DEFAULT_URL + itemAnchor.getHrefAttribute());
+						item.setUrl(itemAnchor.getHrefAttribute());
 						
 						
 						item.setPortal(DEFAULT_URL);
@@ -288,7 +302,7 @@ public List<Item> multiple_page(List<Item> result,int numberOfPages,HtmlAnchor U
 						//Getting Date of item posted	
 						//XMLpath = //*[@id="sortable-results"]/ul/li[1]/p/time
 						HtmlElement Item_Date = ((HtmlElement) htmlItem.getFirstByXPath(".//time[@class='result-date']"));
-						item.setDate(Item_Date.asText());
+						item.setDate(Item_Date.asXml().substring(36, 36+16));
 						//System.out.println(item.getDate());
 						
 						
@@ -345,8 +359,10 @@ public List<Item> scrape_new(String keyword)
 
 						Item item = new Item();
 						item.setTitle(itemAnchor.asText());
+
 						item.setUrl( NEW_URL +itemAnchor.getHrefAttribute());
-						
+			
+            
 						item.setPortal(NEW_URL);
 						item.setPrice((new Double(itemPrice.replaceAll(",", "")))*0.13);
 						result.add(item);
@@ -354,8 +370,24 @@ public List<Item> scrape_new(String keyword)
 						//Getting Date of item posted			
 						//
 						HtmlElement Date = ((HtmlElement) second_htmlItem.getFirstByXPath(".//td[@class='info-content']"));
-						//System.out.println(Date.asText());
-						item.setDate(Date.asText());
+						String date_str = "";
+						for(int k=0;k<Date.asText().length()-1;k++) {
+							if(Date.asText().charAt(k)<=57 && Date.asText().charAt(k)>=48)
+								date_str += Date.asText().charAt(k);
+							else
+								date_str += "-";
+						}
+						
+						if(date_str.length()<10) {
+							if(date_str.charAt(7)!='-')
+								date_str = date_str.substring(0, 5)+"0"+date_str.substring(5,date_str.length());
+							if(date_str.length()<10)
+								date_str = date_str.substring(0,date_str.length()-1)+"0"+date_str.substring(date_str.length()-1,date_str.length());
+						}
+						date_str += " 00:00";
+						item.setDate(date_str);
+						System.out.println(item.getDate());
+						
 						
 					}
 					client.close();

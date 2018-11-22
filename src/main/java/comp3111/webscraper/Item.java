@@ -13,8 +13,10 @@ public class Item
 	private String title ; 
 	private double price ;
 	private String url ;
+
 	private String portal;	// variable that identifies which portal the item came from
 	private String Date;
+
 	
 
 	
@@ -70,6 +72,5 @@ public class Item
 	{
 		this.url = url;
 	}
-	
 
 }
