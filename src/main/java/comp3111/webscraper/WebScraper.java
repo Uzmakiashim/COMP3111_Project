@@ -69,61 +69,166 @@ import javafx.collections.ObservableList;
  * 
  *
  */
-public class WebScraper {
+public class WebScraper 
+{
 
 	private static final String DEFAULT_URL = "https://newyork.craigslist.org/";
+	private static final String NEW_URL = "https://www.price.com.hk/";
+	private int numOfPageScrapped = 0;
+	
 	private WebClient client;
 	/**
 	 * Default Constructor 
 	 */
-	public WebScraper() {
+	public WebScraper() 
+	{
 		client = new WebClient();
-		client.getOptions().setCssEnabled(false);
+		client.getOptions().setCssEnabled(false);// so that we only get HTML files
 		client.getOptions().setJavaScriptEnabled(false);
 	}
 
 	
 	/**
-	 * The only method implemented in this class, to scrape web content from the craigslist
+	 * The only method implemented in this class, to sort the items stored in the List
 	 * 
 	 * @param keyword - the keyword you want to search
-	 * @return A list of Item that has found. A zero size list is return if nothing is found. Null if any exception (e.g. no connectivity)
+	 * @return The sorted result
 	 */
-	public List<Item> scrape(String keyword) {
+	public List<Item> SortItem(List<Item> result)
+	{
+		
+		for(int i=0;i<result.size();i++)
+		{	
+			for(int j=i+1;j<result.size();j++)
+			{
+				if(result.get(i).getPrice() > result.get(j).getPrice())
+				{					
+					Item temp = result.get(i);
+					 result.add(i, result.get(j));
+					 result.remove(i+1);
+					 result.add(j, temp);
+					 result.remove(j+1);
+				}
+				
+				else if(result.get(i).getPrice() == result.get(j).getPrice())
+				{
+					if(result.get(j).getUrl()=="https://newyork.craigslist.org/")
+					{
+						 Item temp = result.get(i);
+						 result.add(i, result.get(j));
+						 result.remove(i+1);
+						 result.add(j, temp);
+						 result.remove(j+1);
+					}	
+				}
+				else
+					continue;
+				
+			}
+		}
+		return result;
+	}
+	
+/**
+ * The only method implemented in this class, to scrape web content from the craigslist
+ * 
+ * @param keyword - the keyword you want to search
+ * @return A list of Item that has found. A zero size list is return if nothing is found. Null if any exception (e.g. no connectivity)
+ */
+	
+public List<Item> scrape(String keyword) 
+	{
 
 		try {
+			int numberOfItems=0;
+			int Craig_num_of_Items = 0;
+			int numberOfPages = 0;
+			int num_ItemsPerPage = 0;
+			HtmlAnchor URL = null;
+			
+			
 			String searchUrl = DEFAULT_URL + "search/sss?sort=rel&query=" + URLEncoder.encode(keyword, "UTF-8");
 			HtmlPage page = client.getPage(searchUrl);
-
-			
+		
 			List<?> items = (List<?>) page.getByXPath("//li[@class='result-row']");
 			
-			Vector<Item> result = new Vector<Item>();
-
-			for (int i = 0; i < items.size(); i++) {
+			
+			HtmlElement temp = (HtmlElement) items.get(0);
+			HtmlElement ItemsPerPage = ((HtmlElement) temp.getFirstByXPath("//*[@id=\"searchform\"]/div[3]/div[3]/span[2]/span[3]/span[1]/span[2]"));
+			num_ItemsPerPage = Integer.parseInt(ItemsPerPage.asText());
+					
+			//Changed from default Vector<Item> result = new Vector<Item>(); because return type is List
+			//Vector<Item> result = new Vector<Item>();
+			List<Item> result = scrape_new(keyword);
+			
+			
+			for (int i = 0; i < num_ItemsPerPage; i++) {
 				HtmlElement htmlItem = (HtmlElement) items.get(i);
 				HtmlAnchor itemAnchor = ((HtmlAnchor) htmlItem.getFirstByXPath(".//p[@class='result-info']/a"));
+				//XML PATH = *[@id="searchform"]/div[3]/div[3]/span[2]/span[3]/span[2]
+				if(i==0)
+				{
+					HtmlElement num_Items = ((HtmlElement) htmlItem.getFirstByXPath("//*[@id=\"searchform\"]/div[3]/div[3]/span[2]/span[3]/span[2]"));
+					numberOfItems = Integer.parseInt(num_Items.asText());
+					
+					HtmlElement Craiglist_num_of_Items = ((HtmlElement) htmlItem.getFirstByXPath("//*[@id=\"searchform\"]/div[3]/div[3]/span[2]/span[3]/span[1]/span[2]"));
+					Craig_num_of_Items = Integer.parseInt(Craiglist_num_of_Items.asText());
+					//System.out.println(numberOfItems);
+					//System.out.println(Craig_num_of_Items);
+				
+					
+				}
+				//System.out.println(itemAnchor.asText());
+				//<span class="result-price">$5</span>
 				HtmlElement spanPrice = ((HtmlElement) htmlItem.getFirstByXPath(".//a/span[@class='result-price']"));
 				//scraping date from website
 				//HtmlElement postedDate = ((HtmlElement)htmlItem.getFirstByXPath(""));
 				// It is possible that an item doesn't have any price, we set the price to 0.0
 				// in this case
 				String itemPrice = spanPrice == null ? "0.0" : spanPrice.asText();
-
 				Item item = new Item();
 				item.setTitle(itemAnchor.asText());
-				item.setUrl(DEFAULT_URL + itemAnchor.getHrefAttribute());
+				item.setUrl(itemAnchor.getHrefAttribute());
+				//DEFAULT_URL + 
+				//Task 2 subtask (ii) Modify the class Item so that it will also record which portal this item is coming from.
+				item.setPortal(DEFAULT_URL);
 				item.setPrice(new Double(itemPrice.replace("$", "")));
 				//task 4
 				//once the date is scrapped, put the postedDate variable instead of "new Date()"
-				item.setDate(new Date());
+				//item.setDate(new Date());
 				result.add(item);
+				
+				//<a href="/search/sss?query=apple&amp;s=120&amp;sort=rel" class="button next" title="next page">next &gt; </a>
+				URL = ((HtmlAnchor) htmlItem.getFirstByXPath("//a[@class='button next']"));
+				
+				//Getting Date of item posted	
+				//XMLpath = //*[@id="sortable-results"]/ul/li[1]/p/time
+				HtmlElement Item_Date = ((HtmlElement) htmlItem.getFirstByXPath(".//time[@class='result-date']"));
+				item.setDate(Item_Date.asText());
+				//System.out.println(item.getDate());
+			
 			}
-			client.close();
-			return result;
-		} catch (Exception e) {
+			numOfPageScrapped++;
+			System.out.println("Number of Pages Scraped: "+numOfPageScrapped);	
+			numberOfPages = (numberOfItems/Craig_num_of_Items)-1;
+			
+			//case when 120 / 2211 where it gives a decimal val but after converting to integer loose the decimal place hence loosing its accuracy
+			if(Craig_num_of_Items%numberOfItems!=0)
+				numberOfPages++;
+			
+			if(numberOfPages>0)
+				result = multiple_page(result,numberOfPages,URL);
+			else
+				 System.out.println("This is the last page that will be scraped");
+	
+		client.close();
+		return SortItem(result);
+		} 
+		catch (Exception e) {
 			System.out.println(e);
 		}
+		
+		
 		return null;
 	}
 	
@@ -141,4 +246,127 @@ public class WebScraper {
 //		return info;
 //	}
 
+	
+	
+/**
+ * The only method implemented in this class, to scrape multiple pages if the result of the search has more than one page
+ * 
+ * @param result - the List of items scraped from other websites
+ * @param numberOfPages - The number of Extra pages to scrape
+ * @param URL - The URL of the next page to scrape
+ * @return The result which contains the scraped data of the multiple web pages
+ */
+public List<Item> multiple_page(List<Item> result,int numberOfPages,HtmlAnchor URL)
+	{
+		
+		for(int i=0;i<numberOfPages ;i++)
+		{
+			 try {
+				 	numOfPageScrapped++;
+					System.out.println("Number of Pages Scraped: "+numOfPageScrapped);
+				 	HtmlPage next_page = client.getPage(DEFAULT_URL+URL.getHrefAttribute());
+				 	List<?> next_items = (List<?>) next_page.getByXPath("//li[@class='result-row']");
+				 	//System.out.println("items_size=="+next_items.size());
+				 	for (int j = 0; j < next_items.size(); j++) 
+				 	{
+				 		HtmlElement htmlItem = (HtmlElement) next_items.get(j);
+				 		HtmlAnchor itemAnchor = ((HtmlAnchor) htmlItem.getFirstByXPath(".//p[@class='result-info']/a"));
+						HtmlElement spanPrice = ((HtmlElement) htmlItem.getFirstByXPath(".//a/span[@class='result-price']"));
+		
+						String itemPrice = spanPrice == null ? "0.0" : spanPrice.asText();
+		
+						Item item = new Item();
+						item.setTitle(itemAnchor.asText());
+						item.setUrl(DEFAULT_URL + itemAnchor.getHrefAttribute());
+						
+						
+						item.setPortal(DEFAULT_URL);
+						item.setPrice(new Double(itemPrice.replace("$", "")));
+						result.add(item);
+						URL = ((HtmlAnchor) htmlItem.getFirstByXPath("//a[@class='button next']"));	
+						
+						//Getting Date of item posted	
+						//XMLpath = //*[@id="sortable-results"]/ul/li[1]/p/time
+						HtmlElement Item_Date = ((HtmlElement) htmlItem.getFirstByXPath(".//time[@class='result-date']"));
+						item.setDate(Item_Date.asText());
+						//System.out.println(item.getDate());
+						
+						
+				 	}
+			 	}
+			 catch (Exception e) 
+			 {
+				 System.out.println(e);
+			 }
+				
+		}
+		System.out.println("This is the last page that will be scraped");
+		return result;
+}
+	
+/**
+ * The only method implemented in this class, that scrapes data from NEW_URL
+ * 
+ * @param keyword - the key word used to search items
+ * @return The result which contains the scraped data of NEW_URL
+ */
+	
+public List<Item> scrape_new(String keyword)
+	{
+	numOfPageScrapped=0;
+				try
+				{
+					//String searchUrl = NEW_URL + "s/ref=nb_sb_noss_2?url=search-alias%3Daps&field-keywords=" + URLEncoder.encode(keyword, "UTF-8");
+					String searchUrl = NEW_URL + "search.php?g=T&q=" + URLEncoder.encode(keyword, "UTF-8");
+					HtmlPage page2 = client.getPage(searchUrl);
+					
+					List<?> items = (List<?>) page2.getByXPath("//div[@class='item']");
+				
+					Vector<Item> result = new Vector<Item>();
+					
+					//Scraping data from the second URL
+					//System.out.println("items_size=="+items.size());
+					for (int i = 0; i < items.size(); i++) //items_second_Url.size() -> number of items in the list 
+					{
+						
+						HtmlElement second_htmlItem = (HtmlElement) items.get(i);
+						
+						//prints all the items and their attributes
+						//System.out.println(second_htmlItem.asText());
+
+
+						HtmlAnchor itemAnchor = ((HtmlAnchor) second_htmlItem.getFirstByXPath(".//div[@class='line line-01']/a"));
+			
+						HtmlElement spanPrice = ((HtmlElement) second_htmlItem.getFirstByXPath(".//span[@class='text-price-number']"));
+				
+						// It is possible that an item doesn't have any price, we set the price to 0.0
+						// in this case
+						String itemPrice = spanPrice == null ? "0.0" : spanPrice.asText();
+
+						Item item = new Item();
+						item.setTitle(itemAnchor.asText());
+						item.setUrl( NEW_URL +itemAnchor.getHrefAttribute());
+						
+						item.setPortal(NEW_URL);
+						item.setPrice((new Double(itemPrice.replaceAll(",", "")))*0.13);
+						result.add(item);
+						
+						//Getting Date of item posted			
+						//
+						HtmlElement Date = ((HtmlElement) second_htmlItem.getFirstByXPath(".//td[@class='info-content']"));
+						//System.out.println(Date.asText());
+						item.setDate(Date.asText());
+						
+					}
+					client.close();
+					numOfPageScrapped++;
+					System.out.println("Number of Pages Scraped: "+numOfPageScrapped);
+					return result;
+				}
+				catch(Exception e) {
+					System.out.println(e.getMessage());
+				}		
+				return null;
+						
+	}
 }

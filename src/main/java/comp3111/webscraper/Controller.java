@@ -40,8 +40,11 @@ public class Controller {
 	@FXML private TableColumn<Item,String> itemTitle;
 	@FXML private TableColumn<Item,String> itemPrice;
 	@FXML private TableColumn<Item,String> itemURL;
-	@FXML private TableColumn<Item,Date> itemPostdate;
-	
+	@FXML private TableColumn<Item,String> itemPostdate;
+
+//Controller is the link between the GUI and the code part(we use scene builder for easier)
+//scene builder generates an xml file -> This file generates the code or HTML version - >
+
     @FXML 
     private Label labelCount; 
 
@@ -69,7 +72,8 @@ public class Controller {
     /**
      * Default controller
      */
-    public Controller() {
+    public Controller() 
+    {
     	scraper = new WebScraper();
     
     }
@@ -110,6 +114,7 @@ public class Controller {
             return urlcell;
         });
         refineButton.setDisable(true);
+
     }
 
     
@@ -118,26 +123,31 @@ public class Controller {
      * Called when the search button is pressed.
      */
     @FXML
-    private void actionSearch() {
-    	//enabling the refine button when go is pressed(Sunny)task 5 
-    	refineButton.setDisable(false);
+    private void actionSearch() 
+    {
+		
     	System.out.println("actionSearch: " + textFieldKeyword.getText());
     	List<Item> result = scraper.scrape(textFieldKeyword.getText());
     	System.out.println(result.size());
+    	if(result.size()!=0)
+    		refineButton.setDisable(false);
     	String output = "";
     	for (Item item : result) {
     		output += item.getTitle() + "\t" + item.getPrice() + "\t" + item.getUrl() + "\n";
     	}    	
     	textAreaConsole.setText(output);
+
     	
     	//task 4
     	this.itemTitle.setCellValueFactory(new PropertyValueFactory<Item,String>("title"));
     	this.itemPrice.setCellValueFactory(new PropertyValueFactory<Item,String>("price"));
        	this.itemURL.setCellValueFactory(new PropertyValueFactory<Item,String>("url"));
-    	this.itemPostdate.setCellValueFactory(new PropertyValueFactory<Item,Date>("date"));
+    	this.itemPostdate.setCellValueFactory(new PropertyValueFactory<Item,String>("date"));
        	this.searchTable.setItems(FXCollections.observableArrayList(result));
  
+       	//Task2_(subtask3)
     	
+    
     }
     
     /**
@@ -145,7 +155,8 @@ public class Controller {
      */
     //Sunny task 4
     @FXML
-    private void actionNew() {
+    private void actionNew() 
+    {
     	String output="";
     	String refineSearch = textFieldKeyword.getText();
     	System.out.println("actionNew: " + refineSearch);
@@ -167,4 +178,3 @@ public class Controller {
     	refineButton.setDisable(true);
     }
 }
-
