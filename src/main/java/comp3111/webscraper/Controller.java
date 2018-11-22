@@ -204,18 +204,6 @@ public class Controller {
     	String output = "";
     	for (Item item : result) {
     		output += item.getTitle() + "\t" + item.getPrice() + "\t" + item.getUrl() + "\n";
-      }
-      
-    	//task 4
-    	this.itemTitle.setCellValueFactory(new PropertyValueFactory<Item,String>("title"));
-    	this.itemPrice.setCellValueFactory(new PropertyValueFactory<Item,String>("price"));
-       	this.itemURL.setCellValueFactory(new PropertyValueFactory<Item,String>("url"));
-    	this.itemPostdate.setCellValueFactory(new PropertyValueFactory<Item,String>("date"));
-       	this.searchTable.setItems(FXCollections.observableArrayList(result));
- 
-       	//Task2_(subtask3)
-    	
-   
     		
     		//-----------------Janice task1-------------------------
     		//update count
@@ -248,6 +236,20 @@ public class Controller {
 			}	
     		//-----------------end of task1-------------------------
     	}
+
+      
+      
+    	//task 4
+    	this.itemTitle.setCellValueFactory(new PropertyValueFactory<Item,String>("title"));
+    	this.itemPrice.setCellValueFactory(new PropertyValueFactory<Item,String>("price"));
+       	this.itemURL.setCellValueFactory(new PropertyValueFactory<Item,String>("url"));
+    	this.itemPostdate.setCellValueFactory(new PropertyValueFactory<Item,String>("date"));
+       	this.searchTable.setItems(FXCollections.observableArrayList(result));
+ 
+       	//Task2_(subtask3)
+    	
+   
+    		
     	
     	textAreaConsole.setText(output);
     	
@@ -296,6 +298,20 @@ public class Controller {
     @FXML
     private void actionNew() 
     {
+    	//-----------------Janice task1------------------------- 
+    	itemNo = 0;
+    	itemNo_aboveZero = 0;
+    	totalPrice = 0.0;
+    	cheapestItem.setPrice(0.0);
+    	cheapestItem.setTitle(null);
+    	cheapestItem.setUrl(null);
+    	cheapestItem.setDate(null);
+    	newestItem.setPrice(0.0);
+    	newestItem.setTitle(null);
+    	newestItem.setUrl(null);
+    	newestItem.setDate(null);
+    	//-----------------end of task1-------------------------
+
     	String output="";
     	String refineSearch = textFieldKeyword.getText();
     	System.out.println("actionNew: " + refineSearch);
@@ -312,9 +328,74 @@ public class Controller {
     	this.searchTable.setItems(FXCollections.observableArrayList(refinedresults));
     	for (Item item : refinedresults) {
     		output += item.getTitle() + "\t" + item.getPrice() + "\t" + item.getUrl() + "\n";
+    		//-----------------Janice task1-------------------------
+    		//update count
+    		++itemNo;
+    		if(item.getPrice()!=0.0) {
+    			//update count for calculating average price
+    			++itemNo_aboveZero;
+    			//update total price for calculating average price
+    			totalPrice += item.getPrice();
+    			//update cheapest item
+    			if(item.getPrice()<cheapestItem.getPrice()||cheapestItem.getPrice()==0.0) {
+        			cheapestItem.setTitle(item.getTitle());
+        			cheapestItem.setPrice(item.getPrice());
+        			cheapestItem.setUrl(item.getUrl());	
+        			cheapestItem.setDate(item.getDate());
+        		}
+    		}
+    		//update newest item
+			try {
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+				if(newestItem.getDate()==null||sdf.parse(item.getDate()).after(sdf.parse(newestItem.getDate()))) {
+					newestItem.setTitle(item.getTitle());
+					newestItem.setPrice(item.getPrice());
+					newestItem.setUrl(item.getUrl());
+					newestItem.setDate(item.getDate());
+				}
+			} catch (ParseException e) {
+				System.err.println("Error in date!");
+				e.printStackTrace();
+			}	
+    		//-----------------end of task1-------------------------
+
     	}    	
     	textAreaConsole.setText(output);
     	refineButton.setDisable(true);
+    	//-----------------Janice task1-------------------------
+    	//show results
+    	labelCount.setText(Integer.toString(itemNo));
+    	labelPrice.setText((totalPrice==0||itemNo_aboveZero==0) ? "-":Double.toString(totalPrice/itemNo_aboveZero));
+    	labelMin.setText(cheapestItem.getUrl()==null ? "-":cheapestItem.getUrl());
+    	labelLatest.setText(newestItem.getUrl()==null ? "-":newestItem.getUrl());
+    	
+    	//only disable link if the url is usable
+    	if(!labelMin.equals("<Lowest>")||!labelMin.equals("-"))
+    		labelMin.setDisable(false);
+    	if(!labelLatest.equals("<Lowest>")||!labelLatest.equals("-"))
+    		labelLatest.setDisable(false);
+    	
+    	//open cheapest item in browswer when link clicked
+    	labelMin.setOnAction(new EventHandler<ActionEvent>() {
+    		@Override
+    		public void handle(ActionEvent e){
+    				app.getHostServices().showDocument(cheapestItem.getUrl());
+    		}
+    	});
+    	//open newest item in browswer when link clicked 
+    	labelLatest.setOnAction(new EventHandler<ActionEvent>() {
+    		@Override
+    		public void handle(ActionEvent e){
+    			app.getHostServices().showDocument(newestItem.getUrl());
+    		}
+    	});
+    	//-----------------end of task1-------------------------
+
+    	
+    	//-----------------Janice task6-------------------------
+    	//update lastSearch button
+    	lsButton.setDisable(false);
+    	//-----------------end of task6-------------------------
     }
     
   //-----------------Janice task6-------------------------
@@ -364,9 +445,13 @@ public class Controller {
     	labelLatest.setText("<Latest>");
     	labelLatest.setDisable(true);
     	
+    	searchTable.setItems(FXCollections.observableArrayList());
+    	
     	//update lastInput to be the input right before the close function
     	lastInput = currentInput;
     	currentInput = null;
     }
   //-----------------end of task6-------------------------
+    
+
 }
