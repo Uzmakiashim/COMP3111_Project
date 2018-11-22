@@ -9,6 +9,12 @@ import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import java.util.Vector;
 
+//-----------------Janice task1-------------------------
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+//-----------------end of task1-------------------------
+
 
 /**
  * WebScraper provide a sample code that scrape web content. After it is constructed, you can call the method scrape with a keyword, 
@@ -176,17 +182,30 @@ public List<Item> scrape(String keyword)
 				//System.out.println(itemAnchor.asText());
 				//<span class="result-price">$5</span>
 				HtmlElement spanPrice = ((HtmlElement) htmlItem.getFirstByXPath(".//a/span[@class='result-price']"));
+				
+				//-----------------Janice task1-------------------------
+				//get date of item
+				HtmlElement timeDate = ((HtmlElement) htmlItem.getFirstByXPath(".//time[@class='result-date']"));
+				//-----------------end of task1-------------------------
 
 				// It is possible that an item doesn't have any price, we set the price to 0.0
 				// in this case
 				String itemPrice = spanPrice == null ? "0.0" : spanPrice.asText();
 				Item item = new Item();
 				item.setTitle(itemAnchor.asText());
-				item.setUrl(DEFAULT_URL + itemAnchor.getHrefAttribute());
+
+				item.setUrl(itemAnchor.getHrefAttribute());
+
 				
 				//Task 2 subtask (ii) Modify the class Item so that it will also record which portal this item is coming from.
 				item.setPortal(DEFAULT_URL);
+
 				item.setPrice(new Double(itemPrice.replace("$", "")));
+				
+				//-----------------Janice task1-------------------------
+				//set date after geting substring from timeDate in the format of yyyy-MM-dd HH:mm
+				item.setDate(timeDate.asXml().substring(36, 36+16));
+				//-----------------end of task1-------------------------
 
 				result.add(item);
 				
@@ -195,9 +214,6 @@ public List<Item> scrape(String keyword)
 				
 				//Getting Date of item posted	
 				//XMLpath = //*[@id="sortable-results"]/ul/li[1]/p/time
-				HtmlElement Item_Date = ((HtmlElement) htmlItem.getFirstByXPath(".//time[@class='result-date']"));
-				item.setDate(Item_Date.asText());
-				//System.out.println(item.getDate());
 			
 			}
 			numOfPageScrapped++;
@@ -265,7 +281,7 @@ public List<Item> multiple_page(List<Item> result,int numberOfPages,HtmlAnchor U
 						//Getting Date of item posted	
 						//XMLpath = //*[@id="sortable-results"]/ul/li[1]/p/time
 						HtmlElement Item_Date = ((HtmlElement) htmlItem.getFirstByXPath(".//time[@class='result-date']"));
-						item.setDate(Item_Date.asText());
+						item.setDate(Item_Date.asXml().substring(36, 36+16));
 						//System.out.println(item.getDate());
 						
 						
