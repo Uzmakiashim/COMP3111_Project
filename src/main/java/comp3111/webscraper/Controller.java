@@ -131,8 +131,7 @@ public class Controller {
     @FXML
     private void initialize() 
     {
-    	System.out.println("In bro");
-        itemURL.setCellFactory(tc ->{
+        itemURL.setCellFactory(tablecell ->{
             TableCell<Item, String> urlcell = new TableCell<Item, String>() 
             {
             @Override
@@ -142,9 +141,10 @@ public class Controller {
                 setText(emptyorNot ? null : itemincell);
             }
             };
-            urlcell.setOnMouseClicked(e -> {
+            urlcell.setOnMouseClicked(click -> {
                 if (urlcell.isEmpty()==false) 
                 {
+                	
                     String clickableURL = urlcell.getItem();
                     if (Desktop.isDesktopSupported()) 
                     {
@@ -199,6 +199,7 @@ public class Controller {
 
     	List<Item> result = scraper.scrape(textFieldKeyword.getText());
     	System.out.println(result.size());
+    	
     	if(result.size()!=0)
     		refineButton.setDisable(false);
     	String output = "";
@@ -237,7 +238,7 @@ public class Controller {
     		//-----------------end of task1-------------------------
     	}
 
-      
+    	
       
     	//task 4
     	this.itemTitle.setCellValueFactory(new PropertyValueFactory<Item,String>("title"));
@@ -313,15 +314,28 @@ public class Controller {
     	//-----------------end of task1-------------------------
 
     	String output="";
-    	String refineSearch = textFieldKeyword.getText();
+    	;
+    	String []refineSearch = textFieldKeyword.getText().trim().split("\\s+");
     	System.out.println("actionNew: " + refineSearch);
     	List<Item> tempresult= this.searchTable.getItems();
     	List<Item> refinedresults= new ArrayList<Item>();
+    	System.out.print(refineSearch);
+    	
     	for(Item item:tempresult)
-    	{
-    		if(item.getTitle().toLowerCase().contains(refineSearch.toLowerCase()))
+  		{
+    		int count=0;
+    		for(int i = 0;i<refineSearch.length;i++)
+        	{
+    			if(item.getTitle().toLowerCase().contains(refineSearch[i].toLowerCase()))
+    				count++;
+        	}
+    		if(count==refineSearch.length)
     			refinedresults.add(item);
     	}
+    	
+    	
+    	
+    		
     	System.out.println(tempresult.size());
     	System.out.println(refinedresults.size());
     	
