@@ -24,19 +24,19 @@ import java.util.Date;
 /**
  * WebScraper provide a sample code that scrape web content. After it is constructed, you can call the method scrape with a keyword, 
  * the client will go to the default url and parse the page by looking at the HTML DOM.  
- * <br/>
+ *
  * In this particular sample code, it access to craigslist.org. You can directly search on an entry by typing the URL
- * <br/>
+ * 
  * https://newyork.craigslist.org/search/sss?sort=rel&amp;query=KEYWORD
- *  <br/>
+ *  
  * where KEYWORD is the keyword you want to search.
- * <br/>
+ * 
  * Assume you are working on Chrome, paste the url into your browser and press F12 to load the source code of the HTML. You might be freak
  * out if you have never seen a HTML source code before. Keep calm and move on. Press Ctrl-Shift-C (or CMD-Shift-C if you got a mac) and move your
  * mouse cursor around, different part of the HTML code and the corresponding the HTML objects will be highlighted. Explore your HTML page from
  * body &rarr; section class="page-container" &rarr; form id="searchform" &rarr; div class="content" &rarr; ul class="rows" &rarr; any one of the multiple 
  * li class="result-row" &rarr; p class="result-info". You might see something like this:
- * <br/>
+ * 
  * <pre>
  * {@code
  *    <p class="result-info">
@@ -63,7 +63,7 @@ import java.util.Date;
  *   </p>
  *}
  *</pre>
- * <br/>
+ * 
  * The code 
  * <pre>
  * {@code
@@ -83,6 +83,7 @@ public class WebScraper
 	private int numOfPageScrapped = 0;
 	
 	private WebClient client;
+	
 	/**
 	 * Default Constructor 
 	 */
@@ -95,10 +96,10 @@ public class WebScraper
 
 	
 	/**
-	 * The only method implemented in this class, to sort the items stored in the List
-	 * 
-	 * @param keyword - the keyword you want to search
-	 * @return The sorted result
+	 * The only method implemented in this class, to sort the items stored in the List in ascending order
+	 * @author Ashim
+	 * @param result - A List of item
+	 * @return The sorted List of Item (result)
 	 */
 	public List<Item> SortItem(List<Item> result)
 	{
@@ -138,12 +139,19 @@ public class WebScraper
 /**
  * The only method implemented in this class, to scrape web content from the craigslist
  * 
- * @param keyword - the keyword you want to search
+ * @param keyword - the keyword you want to search in the website
+ * @param default_url - URL of the website you want to scrape, can also handle multiple pages
+ * @param new_url - URL of the website you want to scrape, can only handle singe page 
  * @return A list of Item that has found. A zero size list is return if nothing is found. Null if any exception (e.g. no connectivity)
  */
 	
-public List<Item> scrape(String keyword) 
+public List<Item> scrape(String keyword, String default_url, String new_url) 
 	{
+		if(default_url=="")
+			default_url = DEFAULT_URL;
+		
+		if(new_url=="")
+			new_url = NEW_URL;
 
 		try {
 			int numberOfItems=0;
@@ -153,7 +161,8 @@ public List<Item> scrape(String keyword)
 			HtmlAnchor URL = null;
 			
 			
-			String searchUrl = DEFAULT_URL + "search/sss?sort=rel&query=" + URLEncoder.encode(keyword, "UTF-8");
+			String searchUrl = default_url + "search/sss?sort=rel&query=" + URLEncoder.encode(keyword, "UTF-8");
+			System.out.println(searchUrl);
 			HtmlPage page = client.getPage(searchUrl);
 		
 			List<?> items = (List<?>) page.getByXPath("//li[@class='result-row']");
@@ -165,7 +174,7 @@ public List<Item> scrape(String keyword)
 					
 			//Changed from default Vector<Item> result = new Vector<Item>(); because return type is List
 			//Vector<Item> result = new Vector<Item>();
-			List<Item> result = scrape_new(keyword);
+			List<Item> result = scrape_new(keyword, default_url,new_url);
 			
 			
 			for (int i = 0; i < num_ItemsPerPage; i++) {
@@ -204,7 +213,7 @@ public List<Item> scrape(String keyword)
 
 			
 				//Task 2 subtask (ii) Modify the class Item so that it will also record which portal this item is coming from.
-				item.setPortal(DEFAULT_URL);
+				item.setPortal(default_url);
 
 				item.setPrice(new Double(itemPrice.replace("$", "")));
 				//-----------------Janice task1-------------------------
@@ -231,7 +240,7 @@ public List<Item> scrape(String keyword)
 				numberOfPages++;
 			
 			if(numberOfPages>0)
-				result = multiple_page(result,numberOfPages,URL);
+				result = multiple_page(result,numberOfPages,URL,default_url);
 			else
 				 System.out.println("This is the last page that will be scraped");
 	
@@ -263,14 +272,15 @@ public List<Item> scrape(String keyword)
 	
 	
 /**
- * The only method implemented in this class, to scrape multiple pages if the result of the search has more than one page
- * 
+ * The only method implemented in this class, to scrape multiple pages if the result of the search has more than one page 
+ * @author Ashim
  * @param result - the List of items scraped from other websites
  * @param numberOfPages - The number of Extra pages to scrape
- * @param URL - The URL of the next page to scrape
- * @return The result which contains the scraped data of the multiple web pages
+ * @param URL - URL of the next page to scrape
+ * @param default_url - The URL of the default page or website
+ * @return The result which contains the scraped data of the multiple web pages stored in a List. A zero size list is return if nothing is found. Null if any exception (e.g. no connectivity)
  */
-public List<Item> multiple_page(List<Item> result,int numberOfPages,HtmlAnchor URL)
+public List<Item> multiple_page(List<Item> result,int numberOfPages,HtmlAnchor URL, String default_url)
 	{
 		
 		for(int i=0;i<numberOfPages ;i++)
@@ -278,7 +288,7 @@ public List<Item> multiple_page(List<Item> result,int numberOfPages,HtmlAnchor U
 			 try {
 				 	numOfPageScrapped++;
 					System.out.println("Number of Pages Scraped: "+numOfPageScrapped);
-				 	HtmlPage next_page = client.getPage(DEFAULT_URL+URL.getHrefAttribute());
+				 	HtmlPage next_page = client.getPage(default_url+URL.getHrefAttribute());
 				 	List<?> next_items = (List<?>) next_page.getByXPath("//li[@class='result-row']");
 				 	//System.out.println("items_size=="+next_items.size());
 				 	for (int j = 0; j < next_items.size(); j++) 
@@ -294,7 +304,7 @@ public List<Item> multiple_page(List<Item> result,int numberOfPages,HtmlAnchor U
 						item.setUrl(itemAnchor.getHrefAttribute());
 						
 						
-						item.setPortal(DEFAULT_URL);
+						item.setPortal(default_url);
 						item.setPrice(new Double(itemPrice.replace("$", "")));
 						result.add(item);
 						URL = ((HtmlAnchor) htmlItem.getFirstByXPath("//a[@class='button next']"));	
@@ -320,18 +330,21 @@ public List<Item> multiple_page(List<Item> result,int numberOfPages,HtmlAnchor U
 	
 /**
  * The only method implemented in this class, that scrapes data from NEW_URL
- * 
+ * @author Ashim
  * @param keyword - the key word used to search items
- * @return The result which contains the scraped data of NEW_URL
+ * @param default_url - URL of the website you want to scrape, can also handle multiple pages
+ * @param new_url - URL of the website you want to scrape, can only handle singe page 
+ * @return The result which is a list of items scraped from a website, A zero size list is return if nothing is found. Null if any exception (e.g. no connectivity)
  */
 	
-public List<Item> scrape_new(String keyword)
+public List<Item> scrape_new(String keyword, String default_url, String new_url)
 	{
+
 	numOfPageScrapped=0;
 				try
 				{
 					//String searchUrl = NEW_URL + "s/ref=nb_sb_noss_2?url=search-alias%3Daps&field-keywords=" + URLEncoder.encode(keyword, "UTF-8");
-					String searchUrl = NEW_URL + "search.php?g=T&q=" + URLEncoder.encode(keyword, "UTF-8");
+					String searchUrl = new_url + "search.php?g=T&q=" + URLEncoder.encode(keyword, "UTF-8");
 					HtmlPage page2 = client.getPage(searchUrl);
 					
 					List<?> items = (List<?>) page2.getByXPath("//div[@class='item']");
@@ -360,10 +373,10 @@ public List<Item> scrape_new(String keyword)
 						Item item = new Item();
 						item.setTitle(itemAnchor.asText());
 
-						item.setUrl( NEW_URL +itemAnchor.getHrefAttribute());
+						item.setUrl( new_url +itemAnchor.getHrefAttribute());
 			
             
-						item.setPortal(NEW_URL);
+						item.setPortal(new_url);
 						item.setPrice((new Double(itemPrice.replaceAll(",", "")))*0.13);
 						result.add(item);
 						
@@ -386,7 +399,7 @@ public List<Item> scrape_new(String keyword)
 						}
 						date_str += " 00:00";
 						item.setDate(date_str);
-						System.out.println(item.getDate());
+						//System.out.println(item.getDate());
 						
 						
 					}

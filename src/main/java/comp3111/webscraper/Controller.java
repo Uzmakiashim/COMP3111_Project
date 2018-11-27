@@ -197,7 +197,7 @@ public class Controller {
     	newestItem.setDate(null);
     	//-----------------end of task1-------------------------
 
-    	List<Item> result = scraper.scrape(textFieldKeyword.getText());
+    	List<Item> result = scraper.scrape(textFieldKeyword.getText(),"","");
     	System.out.println(result.size());
     	
     	if(result.size()!=0)
