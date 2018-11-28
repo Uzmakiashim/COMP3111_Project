@@ -162,7 +162,7 @@ public List<Item> scrape(String keyword, String default_url, String new_url)
 			
 			
 			String searchUrl = default_url + "search/sss?sort=rel&query=" + URLEncoder.encode(keyword, "UTF-8");
-			System.out.println(searchUrl);
+			//System.out.println(searchUrl);
 			HtmlPage page = client.getPage(searchUrl);
 		
 			List<?> items = (List<?>) page.getByXPath("//li[@class='result-row']");
