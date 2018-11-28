@@ -153,6 +153,8 @@ public List<Item> scrape(String keyword, String default_url, String new_url)
 		if(new_url=="")
 			new_url = NEW_URL;
 
+		
+		
 		try {
 			int numberOfItems=0;
 			int Craig_num_of_Items = 0;
@@ -160,6 +162,7 @@ public List<Item> scrape(String keyword, String default_url, String new_url)
 			int num_ItemsPerPage = 0;
 			HtmlAnchor URL = null;
 			
+			List<Item> result = scrape_new(keyword, default_url,new_url);
 			
 			String searchUrl = default_url + "search/sss?sort=rel&query=" + URLEncoder.encode(keyword, "UTF-8");
 			//System.out.println(searchUrl);
@@ -168,13 +171,16 @@ public List<Item> scrape(String keyword, String default_url, String new_url)
 			List<?> items = (List<?>) page.getByXPath("//li[@class='result-row']");
 			
 			
+			if(items.size()!=0)
+			{
 			HtmlElement temp = (HtmlElement) items.get(0);
 			HtmlElement ItemsPerPage = ((HtmlElement) temp.getFirstByXPath("//*[@id=\"searchform\"]/div[3]/div[3]/span[2]/span[3]/span[1]/span[2]"));
 			num_ItemsPerPage = Integer.parseInt(ItemsPerPage.asText());
 					
 			//Changed from default Vector<Item> result = new Vector<Item>(); because return type is List
 			//Vector<Item> result = new Vector<Item>();
-			List<Item> result = scrape_new(keyword, default_url,new_url);
+			
+			//List<Item> result = scrape_new(keyword, default_url,new_url);
 			
 			
 			for (int i = 0; i < num_ItemsPerPage; i++) {
@@ -229,20 +235,27 @@ public List<Item> scrape(String keyword, String default_url, String new_url)
 				
 				//Getting Date of item posted	
 				//XMLpath = //*[@id="sortable-results"]/ul/li[1]/p/time
-			
+			}
 			}
 			numOfPageScrapped++;
 			System.out.println("Number of Pages Scraped: "+numOfPageScrapped);	
+			
+			if(items.size()!=0)
 			numberOfPages = (numberOfItems/Craig_num_of_Items)-1;
 			
+			if(items.size()!=0)
+			{
 			//case when 120 / 2211 where it gives a decimal val but after converting to integer loose the decimal place hence loosing its accuracy
 			if(Craig_num_of_Items%numberOfItems!=0)
 				numberOfPages++;
 			
+			
+				
+			}
 			if(numberOfPages>0)
 				result = multiple_page(result,numberOfPages,URL,default_url);
 			else
-				 System.out.println("This is the last page that will be scraped");
+			 System.out.println("This is the last page that will be scraped");
 	
 		client.close();
 		return SortItem(result);
