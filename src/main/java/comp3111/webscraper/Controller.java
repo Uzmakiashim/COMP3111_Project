@@ -42,6 +42,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 //-----------------end of task6-------------------------
 import java.util.List;
+import java.util.Vector;
 
 
 import java.awt.*;
@@ -97,22 +98,18 @@ public class Controller {
     @FXML
     private Button refineButton;
 
-//-----------------Janice task6-------------------------
-    @FXML
-    private MenuItem lsButton;
-    
+    /**
+     * task 6
+     */
     private String lastInput;
     private String currentInput;
-//-----------------end of task6-------------------------    
-//-----------------Janice task1-------------------------
-    private int itemNo;
-    private int itemNo_aboveZero;
-    private double totalPrice;
-    private Item cheapestItem = new Item();
-    private Item newestItem = new Item();
-    private WebScraperApplication app = new WebScraperApplication();
-//-----------------end of task1-------------------------    
+    private List<Item> lsresult;
+    private List<Item> cresult;
+    @FXML
+    private MenuItem lsButton;
 
+    private WebScraperApplication app = new WebScraperApplication();
+    
     private WebScraper scraper;
     
     
@@ -182,28 +179,30 @@ public class Controller {
        	this.searchTable.setItems(FXCollections.observableArrayList(result)); 	
     }
     
+
     /**
-     * Called when the search button is pressed.
+     * task 1
+     * 
+     * @author Janice Chan
+     * 
+     * Finding out the total number of result items, the average selling price, and the URL
+     * of both the cheapest item and the latest item, the values are returned,
+     * the function is used during search function or refine function
+     * 
+     * @param List<Item>	the list of result items
+     * @exception ParseException
+     * 				if the parsed text is not the same as the SimpleDateFormat
+     * @return List<String>	the list of string listed in summary tab
+     * 
      */
-     
-    @FXML
 
-    private void actionSearch() {
-    	//-----------------Janice task6-------------------------
-    	//updating lastInput
-    	if(currentInput!=textFieldKeyword.getText()) {
-    		lastInput = currentInput;
-    		currentInput = textFieldKeyword.getText();
-    	}
-    	//-----------------end of task6-------------------------
+    protected List<String> summaryContent(List<Item> result) {
+    	int itemNo = 0;
+    	int itemNo_aboveZero = 0;
+    	double totalPrice = 0.0;
     	
-
-    	System.out.println("actionSearch: " + textFieldKeyword.getText());
-    	
-    	//-----------------Janice task1------------------------- 
-    	itemNo = 0;
-    	itemNo_aboveZero = 0;
-    	totalPrice = 0.0;
+    	Item cheapestItem = new Item();
+    	Item newestItem = new Item();
     	cheapestItem.setPrice(0.0);
     	cheapestItem.setTitle(null);
     	cheapestItem.setUrl(null);
@@ -212,18 +211,19 @@ public class Controller {
     	newestItem.setTitle(null);
     	newestItem.setUrl(null);
     	newestItem.setDate(null);
-    	//-----------------end of task1-------------------------
-
-    	List<Item> result = scraper.scrape(textFieldKeyword.getText(),"","");
-    	System.out.println(result.size());
     	
-    	if(result.size()!=0)
-    		setRefinebutton(false);
-    	String output = "";
-    	for (Item item : result) {
-    		output += item.getTitle() + "\t" + item.getPrice() + "\t" + item.getUrl() + "\n";
-    		
-    		//-----------------Janice task1-------------------------
+
+    	Vector<String> output = new Vector<String>();
+    	
+    	if(result==null) {
+        	output.add("0");
+        	output.add("-");
+        	output.add("-");
+        	output.add("-");
+
+        	return output;
+    	}
+    	for(Item item : result) {
     		//update count
     		++itemNo;
     		if(item.getPrice()!=0.0) {
@@ -252,10 +252,7 @@ public class Controller {
 				System.err.println("Error in date!");
 				e.printStackTrace();
 			}	
-    		//-----------------end of task1-------------------------
     	}
-
-    	
       
     	//task 4
     	fitdataintable(result);
@@ -268,46 +265,112 @@ public class Controller {
     	 */
        	//Task2_(subtask3)
     	
-   
-    		
     	
-    	textAreaConsole.setText(output);
+    	output.add(Integer.toString(itemNo));
+    	output.add((totalPrice==0||itemNo_aboveZero==0) ? "-":Double.toString(totalPrice/itemNo_aboveZero));
+    	output.add(cheapestItem.getUrl()==null ? "-":cheapestItem.getUrl());
+    	output.add(newestItem.getUrl()==null ? "-":newestItem.getUrl());
     	
-
-    	//-----------------Janice task1-------------------------
+    	return output;
+    }
+    
+    
+    /**
+     * task 1 
+     * 
+     * @author Janice Chan
+     * 
+     * Fills in the summary tab using the content received and create links
+     * @param output	summary content obtained
+     */
+    protected void fillSummary(List<String> output) {
     	//show results
-    	labelCount.setText(Integer.toString(itemNo));
-    	labelPrice.setText((totalPrice==0||itemNo_aboveZero==0) ? "-":Double.toString(totalPrice/itemNo_aboveZero));
-    	labelMin.setText(cheapestItem.getUrl()==null ? "-":cheapestItem.getUrl());
-    	labelLatest.setText(newestItem.getUrl()==null ? "-":newestItem.getUrl());
+    	labelCount.setText(output.get(0));
+    	labelPrice.setText(output.get(1));
+    	labelMin.setText(output.get(2));
+    	labelLatest.setText(output.get(3));
     	
     	//only disable link if the url is usable
-    	if(!labelMin.equals("<Lowest>")||!labelMin.equals("-"))
+    	if(!labelMin.getText().equals("<Lowest>")||!labelMin.getText().equals("-"))
     		labelMin.setDisable(false);
-    	if(!labelLatest.equals("<Lowest>")||!labelLatest.equals("-"))
+    	if(!labelLatest.getText().equals("<Lowest>")||!labelLatest.getText().equals("-"))
     		labelLatest.setDisable(false);
     	
     	//open cheapest item in browswer when link clicked
     	labelMin.setOnAction(new EventHandler<ActionEvent>() {
     		@Override
     		public void handle(ActionEvent e){
-    				app.getHostServices().showDocument(cheapestItem.getUrl());
+    				app.getHostServices().showDocument(output.get(2));
     		}
     	});
     	//open newest item in browswer when link clicked 
     	labelLatest.setOnAction(new EventHandler<ActionEvent>() {
     		@Override
     		public void handle(ActionEvent e){
-    			app.getHostServices().showDocument(newestItem.getUrl());
+    			app.getHostServices().showDocument(output.get(3));
     		}
-    	});
-    	//-----------------end of task1-------------------------
+    	});    	
+    }
+    
+    
+    
+    
+    /**
+     * Called when the search button is pressed.
+     */
+    @FXML
+
+    private void actionSearch() {
+    	//-----------------Janice task6-------------------------
+    	//updating lastInput
+    	if(currentInput!=textFieldKeyword.getText()) {
+    		lastInput = currentInput;
+    		currentInput = textFieldKeyword.getText();
+    	}
+    	//-----------------end of task6-------------------------
+    	
+
+    	System.out.println("actionSearch: " + textFieldKeyword.getText());
+    	
+    	List<Item> result = scraper.scrape(textFieldKeyword.getText(),"","");
+//    	System.out.println(result.size());
+    	
+    	if(result.size()!=0)
+    		refineButton.setDisable(false);
+    	String output = "";
+    	for (Item item : result) {
+    		output += item.getTitle() + "\t" + item.getPrice() + "\t" + item.getUrl() + "\n";
+       	}
 
     	
-    	//-----------------Janice task6-------------------------
+      
+    	//task 4
+    	this.itemTitle.setCellValueFactory(new PropertyValueFactory<Item,String>("title"));
+    	this.itemPrice.setCellValueFactory(new PropertyValueFactory<Item,String>("price"));
+       	this.itemURL.setCellValueFactory(new PropertyValueFactory<Item,String>("url"));
+    	this.itemPostdate.setCellValueFactory(new PropertyValueFactory<Item,String>("date"));
+       	this.searchTable.setItems(FXCollections.observableArrayList(result));
+ 
+       	//Task2_(subtask3)
+    	
+   
+    		
+    	
+    	textAreaConsole.setText(output);
+    	
+    	//task 6
+    	if(cresult!=result) {
+    		lsresult = cresult;
+    		cresult = result;
+    	}
+    	
+    	//task 1
+    	fillSummary(summaryContent(result));
+    	
+    	//task 6
     	//update lastSearch button
     	lsButton.setDisable(false);
-    	//-----------------end of task6-------------------------
+    	
 
     }
     
@@ -338,26 +401,12 @@ public class Controller {
     @FXML
     private void actionNew() 
     {
-    	//-----------------Janice task1------------------------- 
-    	itemNo = 0;
-    	itemNo_aboveZero = 0;
-    	totalPrice = 0.0;
-    	cheapestItem.setPrice(0.0);
-    	cheapestItem.setTitle(null);
-    	cheapestItem.setUrl(null);
-    	cheapestItem.setDate(null);
-    	newestItem.setPrice(0.0);
-    	newestItem.setTitle(null);
-    	newestItem.setUrl(null);
-    	newestItem.setDate(null);
-    	//-----------------end of task1-------------------------
-
     	String output="";
     	;
     	String []refineSearch = textFieldKeyword.getText().trim().split("\\s+");
     	System.out.println("actionNew: " + refineSearch);
     	List<Item> refinedresults= new ArrayList<Item>();
-    	System.out.print(refineSearch);
+//    	System.out.print(refineSearch);
     	
     	
     	/*
@@ -374,99 +423,89 @@ public class Controller {
     			refinedresults.add(item);
     	}
     	
+
     	*/    	
     	//this.searchTable.setItems(FXCollections.observableArrayList(refinedresults));
     	List<Item> tempresult= this.searchTable.getItems();
     	refinedresults = refiningitems(refineSearch,tempresult);
     	fitdataintable(refinedresults);
+
     	for (Item item : refinedresults) {
     		output += item.getTitle() + "\t" + item.getPrice() + "\t" + item.getUrl() + "\n";
-    		//-----------------Janice task1-------------------------
-    		//update count
-    		++itemNo;
-    		if(item.getPrice()!=0.0) {
-    			//update count for calculating average price
-    			++itemNo_aboveZero;
-    			//update total price for calculating average price
-    			totalPrice += item.getPrice();
-    			//update cheapest item
-    			if(item.getPrice()<cheapestItem.getPrice()||cheapestItem.getPrice()==0.0) {
-        			cheapestItem.setTitle(item.getTitle());
-        			cheapestItem.setPrice(item.getPrice());
-        			cheapestItem.setUrl(item.getUrl());	
-        			cheapestItem.setDate(item.getDate());
-        		}
-    		}
-    		//update newest item
-			try {
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-				if(newestItem.getDate()==null||sdf.parse(item.getDate()).after(sdf.parse(newestItem.getDate()))) {
-					newestItem.setTitle(item.getTitle());
-					newestItem.setPrice(item.getPrice());
-					newestItem.setUrl(item.getUrl());
-					newestItem.setDate(item.getDate());
-				}
-			} catch (ParseException e) {
-				System.err.println("Error in date!");
-				e.printStackTrace();
-			}	
-    		//-----------------end of task1-------------------------
-
     	}    	
     	textAreaConsole.setText(output);
-    	setRefinebutton(true);
-    	//-----------------Janice task1-------------------------
-    	//show results
-    	labelCount.setText(Integer.toString(itemNo));
-    	labelPrice.setText((totalPrice==0||itemNo_aboveZero==0) ? "-":Double.toString(totalPrice/itemNo_aboveZero));
-    	labelMin.setText(cheapestItem.getUrl()==null ? "-":cheapestItem.getUrl());
-    	labelLatest.setText(newestItem.getUrl()==null ? "-":newestItem.getUrl());
-    	
-    	//only disable link if the url is usable
-    	if(!labelMin.equals("<Lowest>")||!labelMin.equals("-"))
-    		labelMin.setDisable(false);
-    	if(!labelLatest.equals("<Lowest>")||!labelLatest.equals("-"))
-    		labelLatest.setDisable(false);
-    	
-    	//open cheapest item in browswer when link clicked
-    	labelMin.setOnAction(new EventHandler<ActionEvent>() {
-    		@Override
-    		public void handle(ActionEvent e){
-    				app.getHostServices().showDocument(cheapestItem.getUrl());
-    		}
-    	});
-    	//open newest item in browswer when link clicked 
-    	labelLatest.setOnAction(new EventHandler<ActionEvent>() {
-    		@Override
-    		public void handle(ActionEvent e){
-    			app.getHostServices().showDocument(newestItem.getUrl());
-    		}
-    	});
-    	//-----------------end of task1-------------------------
 
+    	setRefinebutton(true);
+
+    	fillSummary(summaryContent(refinedresults));
     	
-    	//-----------------Janice task6-------------------------
+    	
+    	//task 6
     	//update lastSearch button
     	lsButton.setDisable(false);
-    	//-----------------end of task6-------------------------
+    	
     }
     
-  //-----------------Janice task6-------------------------
-    //task6: last search function
+    /**
+     * task 6
+     * 
+     * @author Janice Chan
+     * 
+     * Revert the search result of the last search, but excluding the refine result
+     */
     @FXML
-    private void lastSearch() {
+    protected void lastSearch() {
     	System.out.println("Last Search: "+lastInput);
     	if(lastInput==null)
     		textFieldKeyword.setText(currentInput);
     	else
     		textFieldKeyword.setText(lastInput);
-    	actionSearch();
+//    	actionSearch();
+    	
+    	if(lsresult==null)
+    		lsresult = cresult;
+    	
+    	if(currentInput!=textFieldKeyword.getText()) {
+    		lastInput = currentInput;
+    		currentInput = textFieldKeyword.getText();
+    	}
+    	
+    	System.out.println("LastactionSearch: " + textFieldKeyword.getText());
+
+//    	System.out.println(lsresult.size());
+    	
+    	if(lsresult.size()!=0)
+    		refineButton.setDisable(false);
+    	String output = "";
+    	for (Item item : lsresult) {
+    		output += item.getTitle() + "\t" + item.getPrice() + "\t" + item.getUrl() + "\n";
+    	}
+
+    	//task 4
+    	this.itemTitle.setCellValueFactory(new PropertyValueFactory<Item,String>("title"));
+    	this.itemPrice.setCellValueFactory(new PropertyValueFactory<Item,String>("price"));
+       	this.itemURL.setCellValueFactory(new PropertyValueFactory<Item,String>("url"));
+    	this.itemPostdate.setCellValueFactory(new PropertyValueFactory<Item,String>("date"));
+       	this.searchTable.setItems(FXCollections.observableArrayList(lsresult));
+   
+    	    	
+    	textAreaConsole.setText(output);
+    	
+    	
+    	fillSummary(summaryContent(lsresult));
+    	
     	lsButton.setDisable(true);
     }
     
-    //task6: About the Team
+    /**
+     * task 6
+     * 
+     * @author Janice Chan
+     * 
+     * Show team information after clicking "About the Team" button
+     */
     @FXML
-    private void teamInfo() {
+    protected void teamInfo() {
     	System.out.println("TeamInfo");
     	Alert alert = new Alert(AlertType.INFORMATION);
     	alert.setTitle("About the Team");
@@ -478,16 +517,28 @@ public class Controller {
     	alert.showAndWait();
     }
     
-    //task6: quit function
+    /**
+     * task 6
+     * 
+     * @author Janice Chan
+     * 
+     * Quit the program after clicking "Quit" button
+     */
     @FXML
-    private void quit() {
+    protected void quit() {
     	System.out.println("Quit");
     	System.exit(0);
     }
     
-    //task6: close function
+    /**
+     * task 6
+     * 
+     * @author Janice Chan
+     * 
+     * Close the current search and clear all the result of previous search
+     */
     @FXML
-    private void close() {
+    protected void close() {
     	System.out.println("Close");
     	textAreaConsole.clear();
     	textFieldKeyword.clear();
@@ -502,8 +553,7 @@ public class Controller {
        	//update lastInput to be the input right before the close function
     	lastInput = currentInput;
     	currentInput = null;
+    	lsresult = cresult;
+    	cresult = null;
     }
-  //-----------------end of task6-------------------------
-    
-
 }
