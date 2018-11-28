@@ -124,51 +124,68 @@ public class Controller {
     	scraper = new WebScraper();
     
     }
-
+    
+    public void initializetableview()
+    {
+    	 itemURL.setCellFactory(tablecell ->{
+             TableCell<Item, String> urlcell = new TableCell<Item, String>() 
+             {
+             @Override
+             protected void updateItem(String itemincell, boolean emptyorNot)
+             {
+             	super.updateItem(itemincell, emptyorNot);
+                 setText(emptyorNot ? null : itemincell);
+             }
+             };
+             urlcell.setOnMouseClicked(click -> {
+                 if (urlcell.isEmpty()==false) 
+                 {
+                 	
+                     String clickableURL = urlcell.getItem();
+                     if (Desktop.isDesktopSupported()) 
+                     {
+                         try 
+                         {
+                             Desktop.getDesktop().browse(new URI(clickableURL));
+                         } catch (Exception exception) 
+                         {
+                             exception.printStackTrace();
+                         }
+                     }
+                 }
+             });
+             return urlcell;
+         });
+    	this.itemTitle.setCellValueFactory(new PropertyValueFactory<Item,String>("title"));
+     	this.itemPrice.setCellValueFactory(new PropertyValueFactory<Item,String>("price"));
+        this.itemURL.setCellValueFactory(new PropertyValueFactory<Item,String>("url"));
+     	this.itemPostdate.setCellValueFactory(new PropertyValueFactory<Item,String>("date"));
+    }
+    public void setRefinebutton(boolean enable) 
+    {
+    	refineButton.setDisable(enable);
+    }
+    
     /**
      * Default initializer. It is empty.
      */
     @FXML
     private void initialize() 
     {
-        itemURL.setCellFactory(tablecell ->{
-            TableCell<Item, String> urlcell = new TableCell<Item, String>() 
-            {
-            @Override
-            protected void updateItem(String itemincell, boolean emptyorNot)
-            {
-            	super.updateItem(itemincell, emptyorNot);
-                setText(emptyorNot ? null : itemincell);
-            }
-            };
-            urlcell.setOnMouseClicked(click -> {
-                if (urlcell.isEmpty()==false) 
-                {
-                	
-                    String clickableURL = urlcell.getItem();
-                    if (Desktop.isDesktopSupported()) 
-                    {
-                        try 
-                        {
-                            Desktop.getDesktop().browse(new URI(clickableURL));
-                        } catch (Exception exception) 
-                        {
-                            exception.printStackTrace();
-                        }
-                    }
-                }
-            });
-            return urlcell;
-        });
-        refineButton.setDisable(true);
+    	initializetableview();
+    	setRefinebutton(true);
 
     }
 
-    
+    public void fitdataintable(List<Item> result)
+    {    	
+       	this.searchTable.setItems(FXCollections.observableArrayList(result)); 	
+    }
     
     /**
      * Called when the search button is pressed.
      */
+     
     @FXML
 
     private void actionSearch() {
@@ -201,7 +218,7 @@ public class Controller {
     	System.out.println(result.size());
     	
     	if(result.size()!=0)
-    		refineButton.setDisable(false);
+    		setRefinebutton(false);
     	String output = "";
     	for (Item item : result) {
     		output += item.getTitle() + "\t" + item.getPrice() + "\t" + item.getUrl() + "\n";
@@ -241,12 +258,14 @@ public class Controller {
     	
       
     	//task 4
+    	fitdataintable(result);
+    	/*
     	this.itemTitle.setCellValueFactory(new PropertyValueFactory<Item,String>("title"));
     	this.itemPrice.setCellValueFactory(new PropertyValueFactory<Item,String>("price"));
        	this.itemURL.setCellValueFactory(new PropertyValueFactory<Item,String>("url"));
     	this.itemPostdate.setCellValueFactory(new PropertyValueFactory<Item,String>("date"));
        	this.searchTable.setItems(FXCollections.observableArrayList(result));
- 
+    	 */
        	//Task2_(subtask3)
     	
    
@@ -292,6 +311,26 @@ public class Controller {
 
     }
     
+    public List<Item> refiningitems(String refineSearch[],List<Item> tempresult)
+    {
+    	List<Item> refinedresults= new ArrayList<Item>();
+    	for(Item item:tempresult)
+  		{
+    		int count=0;
+    		for(int i = 0;i<refineSearch.length;i++)
+        	{
+    			if(item.getTitle().toLowerCase().contains(refineSearch[i].toLowerCase()))
+    				count++;
+        	}
+    		if(count==refineSearch.length)
+    			refinedresults.add(item);
+    	}
+    	System.out.println(tempresult.size());
+    	System.out.println(refinedresults.size());
+    	return refinedresults;
+    	
+    }
+    
     /**
      * Called when the new button is pressed. Very dummy action - print something in the command prompt.
      */
@@ -317,10 +356,12 @@ public class Controller {
     	;
     	String []refineSearch = textFieldKeyword.getText().trim().split("\\s+");
     	System.out.println("actionNew: " + refineSearch);
-    	List<Item> tempresult= this.searchTable.getItems();
     	List<Item> refinedresults= new ArrayList<Item>();
     	System.out.print(refineSearch);
     	
+    	
+    	/*
+    	List<Item> tempresult= this.searchTable.getItems();
     	for(Item item:tempresult)
   		{
     		int count=0;
@@ -333,13 +374,11 @@ public class Controller {
     			refinedresults.add(item);
     	}
     	
-    	
-    	
-    		
-    	System.out.println(tempresult.size());
-    	System.out.println(refinedresults.size());
-    	
-    	this.searchTable.setItems(FXCollections.observableArrayList(refinedresults));
+    	*/    	
+    	//this.searchTable.setItems(FXCollections.observableArrayList(refinedresults));
+    	List<Item> tempresult= this.searchTable.getItems();
+    	refinedresults = refiningitems(refineSearch,tempresult);
+    	fitdataintable(refinedresults);
     	for (Item item : refinedresults) {
     		output += item.getTitle() + "\t" + item.getPrice() + "\t" + item.getUrl() + "\n";
     		//-----------------Janice task1-------------------------
@@ -375,7 +414,7 @@ public class Controller {
 
     	}    	
     	textAreaConsole.setText(output);
-    	refineButton.setDisable(true);
+    	setRefinebutton(true);
     	//-----------------Janice task1-------------------------
     	//show results
     	labelCount.setText(Integer.toString(itemNo));
@@ -460,8 +499,7 @@ public class Controller {
     	labelLatest.setDisable(true);
     	
     	searchTable.setItems(FXCollections.observableArrayList());
-    	
-    	//update lastInput to be the input right before the close function
+       	//update lastInput to be the input right before the close function
     	lastInput = currentInput;
     	currentInput = null;
     }
