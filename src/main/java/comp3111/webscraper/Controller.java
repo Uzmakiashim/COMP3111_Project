@@ -121,7 +121,15 @@ public class Controller {
     	scraper = new WebScraper();
     
     }
-    
+//    public int gettableviewsize()
+//    {
+//    	return this.searchTable.getItems().size();
+//    }
+    /**
+	 * This method initializes the tableview, it links the table columns with its respective member variables in item.java
+	 * and also the table cell url is made clickable in this function.
+	 * @author Gursharan
+	 */
     public void initializetableview()
     {
     	 itemURL.setCellFactory(tablecell ->{
@@ -158,6 +166,12 @@ public class Controller {
         this.itemURL.setCellValueFactory(new PropertyValueFactory<Item,String>("url"));
      	this.itemPostdate.setCellValueFactory(new PropertyValueFactory<Item,String>("date"));
     }
+    /**
+	 * This method is used to enable or disable the refine button based on the boolean value it receives in its 
+	 * parameter.
+	 * @author Gursharan
+	 * @param enable - boolean variable 
+	 * */
     public void setRefinebutton(boolean enable) 
     {
     	refineButton.setDisable(enable);
@@ -173,7 +187,11 @@ public class Controller {
     	setRefinebutton(true);
 
     }
-
+    /**
+	 *This method fits the items in the list results onto the tableview through the setItems function
+	 * @author Gursharan
+	 * @param result - a list of items
+	 */
     public void fitdataintable(List<Item> result)
     {    	
        	this.searchTable.setItems(FXCollections.observableArrayList(result)); 	
@@ -255,7 +273,7 @@ public class Controller {
     	}
       
     	//task 4
-    	fitdataintable(result);
+    	
     	/*
     	this.itemTitle.setCellValueFactory(new PropertyValueFactory<Item,String>("title"));
     	this.itemPrice.setCellValueFactory(new PropertyValueFactory<Item,String>("price"));
@@ -284,6 +302,8 @@ public class Controller {
      * @param output	summary content obtained
      */
     protected void fillSummary(List<String> output) {
+    	
+    	
     	//show results
     	labelCount.setText(output.get(0));
     	labelPrice.setText(output.get(1));
@@ -344,13 +364,16 @@ public class Controller {
 
     	
       
+    	
     	//task 4
+    	/*
     	this.itemTitle.setCellValueFactory(new PropertyValueFactory<Item,String>("title"));
     	this.itemPrice.setCellValueFactory(new PropertyValueFactory<Item,String>("price"));
        	this.itemURL.setCellValueFactory(new PropertyValueFactory<Item,String>("url"));
     	this.itemPostdate.setCellValueFactory(new PropertyValueFactory<Item,String>("date"));
        	this.searchTable.setItems(FXCollections.observableArrayList(result));
- 
+       	*/
+       	fitdataintable(result);
        	//Task2_(subtask3)
     	
    

@@ -37,6 +37,11 @@ dependencies {
 
 	// https://mvnrepository.com/artifact/junit/junit
 	testCompile group: 'junit', name: 'junit', version: '4.12'
+	//testfx
+	testCompile "org.testfx:testfx-core:4.0.+"
+	testCompile "org.testfx:testfx-junit:4.0.+"
+	//testCompile group: 'org.loadui', name: 'testFx', version: '3.1.0'
+	testCompile 'org.loadui:testFx:3.1.2'
 }
 
 jacocoTestReport {
