@@ -8,12 +8,15 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.testfx.api.FxToolkit;
 import org.testfx.framework.junit.ApplicationTest;
-import org.loadui.testfx.GuiTest;
+import static org.testfx.api.FxAssert.*;
+import static org.testfx.matcher.control.LabeledMatchers.*;
+import org.testfx.matcher.control.TextInputControlMatchers;
+//import org.loadui.testfx.GuiTest;
 //import static org.junit.Assert.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
-
-
+import javafx.scene.control.*;
+import javafx.scene.Node;
 
 import static org.junit.Assert.*;
 
@@ -49,6 +52,12 @@ public class ControllerTest extends ApplicationTest{
     		
 
 	}
+	
+    public <T extends Node> T find(final String query) {
+        /* TestFX provides many operations to retrieve elements from the loaded GUI. */
+        return lookup(query).query();
+    }
+    
 	@Before
 
 	public void setUp () throws Exception {
@@ -65,6 +74,7 @@ public class ControllerTest extends ApplicationTest{
 	@Test
 	public void testfitdatatable()
 	{
+		System.out.println("TESTING: testfitdatatable");
 		WebScraper test = new WebScraper();
 		Controller control = new Controller();
 		//List<Item> results = test.scrape("tommy", "", "");
@@ -96,6 +106,8 @@ public class ControllerTest extends ApplicationTest{
 	@Test
 	public void refiningItems()
 	{
+		System.out.println("TESTING: refiningItems");
+		
 		Controller test = new Controller();
 		Item a = new Item();
 		a.setTitle("A B C");
@@ -163,7 +175,9 @@ public class ControllerTest extends ApplicationTest{
 	
 	@Test
 	public void testSummaryContent() {
-		Controller controller = new Controller();
+		System.out.println("TESTING: testSummaryContent");
+		
+		Controller control = new Controller();
 		Item a = new Item();
 		a.setTitle("A");
 		a.setPrice(0.0);
@@ -199,7 +213,7 @@ public class ControllerTest extends ApplicationTest{
 		result.add(d);
 		
 		
-		List<String> output = controller.summaryContent(result);
+		List<String> output = control.summaryContent(result);
 		
 		assertEquals(output.get(0),"4");
 		assertEquals(output.get(1),"200.0");
@@ -208,12 +222,136 @@ public class ControllerTest extends ApplicationTest{
 		
 		//new search
 		result = null;
-		output = controller.summaryContent(result);
+		output = control.summaryContent(result);
 		
 		assertEquals(output.get(0),"0");
 		assertEquals(output.get(1),"-");
 		assertEquals(output.get(2),"-");
 		assertEquals(output.get(3),"-");
+		
+	}
+	 
+	@Test
+	public void testFillSummary() {
+		System.out.println("TESTING: testFillSummary");
+		
+		WebScraper test = new WebScraper();
+		Controller control = new Controller();
+		
+		sleep(3000);
+		//new search
+//		moveTo("textFieldKeyword").clickOn("#textFieldKeyword");
+//		write("tommy");
+//		moveTo("Go").clickOn("Go");
+		
+		//clickable URL
+//		clickOn("Summary");
+//		moveTo("#labelMin").clickOn("#labelMin");
+//		sleep(5000);
+//		press(KeyCode.ALT).press(KeyCode.TAB).release(KeyCode.ALT,KeyCode.TAB);
+//		moveTo("#labelLatest").clickOn("#labelLatest");
+//		sleep(5000);
+//		press(KeyCode.ALT).press(KeyCode.TAB).release(KeyCode.ALT,KeyCode.TAB);
+		
+		//new search
+		moveTo("#textFieldKeyword").clickOn("#textFieldKeyword");
+		for(int i=0;i<5;i++)
+			push(KeyCode.BACK_SPACE);
+		write("qwer");
+		moveTo("Go").clickOn("Go");
+		
+		verifyThat("#labelCount",hasText("0"));
+		verifyThat("#labelPrice",hasText("-"));
+		verifyThat("#labelMin",hasText("-"));
+		verifyThat("#labelLatest",hasText("-"));
+	}
+	
+	@Test
+	public void testShowTeamInfo() {
+		System.out.println("TESTING: testShowTeamInfo");
+		
+		WebScraper test = new WebScraper();
+		Controller control = new Controller();
+		sleep(3000);
+		
+		moveTo("Help").clickOn("Help");
+		moveTo("About Your Team").clickOn("About Your Team");
+		clickOn("OK");
+	}
+
+	@Test
+	public void testClose() {
+		System.out.println("TESTING: testClose");
+		
+		WebScraper test = new WebScraper();
+		Controller control = new Controller();
+		sleep(3000);
+		
+		//new search
+		moveTo("#textFieldKeyword").clickOn("#textFieldKeyword");
+		write("tommy");
+		moveTo("Go").clickOn("Go");
+		
+		//close
+		moveTo("File").clickOn("File");
+		moveTo("Close").clickOn("Close");
+		
+		verifyThat("#labelCount",hasText("<total>"));
+		verifyThat("#labelPrice",hasText("<AvgPrice>"));
+		verifyThat("#labelMin",hasText("<Lowest>"));
+		verifyThat("#labelLatest",hasText("<Latest>"));
+		verifyThat("#textFieldKeyword",TextInputControlMatchers.hasText(""));
+	}
+	
+	@Test
+	public void testLastSearch() {
+		System.out.println("TESTING: testLastSearch");
+		
+		WebScraper test = new WebScraper();
+		Controller control = new Controller();
+		sleep(3000);
+		
+		//Last search button initially disabled
+		moveTo("File").clickOn("File");
+		
+		//new search
+		moveTo("#textFieldKeyword").clickOn("#textFieldKeyword");
+		write("tommy");
+		moveTo("Go").clickOn("Go");
+		
+		//Last search button enabled after first search
+		moveTo("File").clickOn("File");
+		moveTo("Last Search").clickOn("Last Search");
+		verifyThat("#textFieldKeyword",TextInputControlMatchers.hasText("tommy"));
+		
+		//Last Search button disabled after clicking once
+		moveTo("File").clickOn("File");
+		
+		//new search
+		moveTo("#textFieldKeyword").clickOn("#textFieldKeyword");
+		write("qwer");
+		moveTo("Go").clickOn("Go");
+		
+		//last search should show results of tommy
+		moveTo("File").clickOn("File");
+		moveTo("Last Search").clickOn("Last Search");
+		verifyThat("#textFieldKeyword",TextInputControlMatchers.hasText("tommy"));
+		
+		//new search
+		moveTo("#textFieldKeyword").clickOn("#textFieldKeyword");
+		for(int i=0;i<5;i++)
+			push(KeyCode.BACK_SPACE);
+		write("qwer");
+		moveTo("Go").clickOn("Go");
+		
+		//close
+		moveTo("File").clickOn("File");
+		moveTo("Close").clickOn("Close");
+		
+		//last search should show results of qwer after close
+		moveTo("File").clickOn("File");
+		moveTo("Last Search").clickOn("Last Search");
+		verifyThat("#textFieldKeyword",TextInputControlMatchers.hasText("qwer"));		
 		
 	}
 
