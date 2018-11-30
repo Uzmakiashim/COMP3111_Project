@@ -411,8 +411,8 @@ public class Controller {
     		if(count==refineSearch.length)
     			refinedresults.add(item);
     	}
-    	System.out.println(tempresult.size());
-    	System.out.println(refinedresults.size());
+    	//System.out.println(tempresult.size());
+    	//System.out.println(refinedresults.size());
     	return refinedresults;
     	
     }
@@ -427,7 +427,7 @@ public class Controller {
     	String output="";
     	;
     	String []refineSearch = textFieldKeyword.getText().trim().split("\\s+");
-    	System.out.println("actionNew: " + refineSearch);
+    	//System.out.println("actionNew: " + refineSearch);
     	List<Item> refinedresults= new ArrayList<Item>();
 //    	System.out.print(refineSearch);
     	
