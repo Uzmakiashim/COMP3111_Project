@@ -246,11 +246,9 @@ public List<Item> scrape(String keyword, String default_url, String new_url)
 			if(items.size()!=0)
 			{
 			//case when 120 / 2211 where it gives a decimal val but after converting to integer loose the decimal place hence loosing its accuracy
-			if(Craig_num_of_Items%numberOfItems!=0)
-				numberOfPages++;
-			
-			
-				
+			if(numberOfItems%Craig_num_of_Items!=0)
+			{
+				numberOfPages++;}
 			}
 			if(numberOfPages>0)
 				result = multiple_page(result,numberOfPages,URL,default_url);
