@@ -98,7 +98,7 @@ public class WebScraper
 	/**
 	 * The only method implemented in this class, to sort the items stored in the List in ascending order
 	 * @author Ashim
-	 * @param result - A List of item
+	 * @param result  A List of item
 	 * @return The sorted List of Item (result)
 	 */
 	public List<Item> SortItem(List<Item> result)
@@ -139,9 +139,9 @@ public class WebScraper
 /**
  * The only method implemented in this class, to scrape web content from the craigslist
  * 
- * @param keyword - the keyword you want to search in the website
- * @param default_url - URL of the website you want to scrape, can also handle multiple pages
- * @param new_url - URL of the website you want to scrape, can only handle singe page 
+ * @param keyword  the keyword you want to search in the website
+ * @param default_url  URL of the website you want to scrape, can also handle multiple pages
+ * @param new_url  URL of the website you want to scrape, can only handle singe page 
  * @return A list of Item that has found. A zero size list is return if nothing is found. Null if any exception (e.g. no connectivity)
  */
 	
@@ -285,10 +285,10 @@ public List<Item> scrape(String keyword, String default_url, String new_url)
 /**
  * The only method implemented in this class, to scrape multiple pages if the result of the search has more than one page 
  * @author Ashim
- * @param result - the List of items scraped from other websites
- * @param numberOfPages - The number of Extra pages to scrape
- * @param URL - URL of the next page to scrape
- * @param default_url - The URL of the default page or website
+ * @param result  the List of items scraped from other websites
+ * @param numberOfPages The number of Extra pages to scrape
+ * @param URL URL of the next page to scrape
+ * @param default_url The URL of the default page or website
  * @return The result which contains the scraped data of the multiple web pages stored in a List. A zero size list is return if nothing is found. Null if any exception (e.g. no connectivity)
  */
 public List<Item> multiple_page(List<Item> result,int numberOfPages,HtmlAnchor URL, String default_url)
@@ -342,9 +342,9 @@ public List<Item> multiple_page(List<Item> result,int numberOfPages,HtmlAnchor U
 /**
  * The only method implemented in this class, that scrapes data from NEW_URL
  * @author Ashim
- * @param keyword - the key word used to search items
- * @param default_url - URL of the website you want to scrape, can also handle multiple pages
- * @param new_url - URL of the website you want to scrape, can only handle singe page 
+ * @param keyword the key word used to search items
+ * @param default_url  URL of the website you want to scrape, can also handle multiple pages
+ * @param new_url  URL of the website you want to scrape, can only handle singe page 
  * @return The result which is a list of items scraped from a website, A zero size list is return if nothing is found. Null if any exception (e.g. no connectivity)
  */
 	

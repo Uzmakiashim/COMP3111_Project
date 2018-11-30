@@ -170,7 +170,7 @@ public class Controller {
 	 * This method is used to enable or disable the refine button based on the boolean value it receives in its 
 	 * parameter.
 	 * @author Gursharan
-	 * @param enable - boolean variable 
+	 * @param enable  boolean variable 
 	 * */
     public void setRefinebutton(boolean enable) 
     {
@@ -190,7 +190,7 @@ public class Controller {
     /**
 	 *This method fits the items in the list results onto the tableview through the setItems function
 	 * @author Gursharan
-	 * @param result - a list of items
+	 * @param result  a list of items
 	 */
     public void fitdataintable(List<Item> result)
     {    	
@@ -207,7 +207,7 @@ public class Controller {
      * of both the cheapest item and the latest item, the values are returned,
      * the function is used during search function or refine function
      * 
-     * @param List<Item>	the list of result items
+     * @param result	the list of result items
      * @exception ParseException
      * 				if the parsed text is not the same as the SimpleDateFormat
      * @return List<String>	the list of string listed in summary tab
@@ -396,7 +396,12 @@ public class Controller {
     	
 
     }
-    
+    /**
+     * Allows one to refine items from the table to get specific items
+     * @param refineSearch keyword from the items to be refined
+     * @param tempresult the list of items to be refined
+     * @return refined list of items
+     */
     public List<Item> refiningitems(String refineSearch[],List<Item> tempresult)
     {
     	List<Item> refinedresults= new ArrayList<Item>();
